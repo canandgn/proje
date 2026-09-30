@@ -25,18 +25,13 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button onclick="syncLiveGoogleSheets(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+        <button onclick="syncLiveSheets(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
           <i id="syncIcon" class="fa-solid fa-arrows-rotate text-blue-400"></i>
-          <span id="syncBtnText" class="hidden sm:inline">Listeyi Yenile</span>
-        </button>
-
-        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-          <i id="adminLockIcon" class="fa-solid fa-lock text-amber-400"></i>
-          <span id="adminBtnText" class="hidden sm:inline">Yönetici</span>
+          <span class="hidden sm:inline">Listeyi Yenile</span>
         </button>
 
         <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg font-mono">
-          Toplam: <strong id="totalCount" class="text-blue-400 text-sm">0</strong>
+          Toplam Parça: <strong id="totalCount" class="text-blue-400 text-sm">0</strong>
         </span>
       </div>
     </div>
@@ -44,15 +39,15 @@
 
   <main class="max-w-7xl mx-auto p-3 md:p-6 space-y-4">
 
-    <!-- Canlı Senkronizasyon Durum Bildirimi -->
+    <!-- Bilgi Çubuğu -->
     <div id="statusAlert" class="text-xs bg-blue-50 border border-blue-200 text-blue-800 px-3.5 py-2 rounded-xl flex items-center justify-between shadow-sm">
-      <span id="statusText" class="flex items-center gap-2">
-        <i class="fa-solid fa-cloud-arrow-down text-blue-600"></i> Google E-Tablolar'a canlı bağlanıyor...
+      <span id="statusText" class="flex items-center gap-2 font-medium">
+        <i class="fa-solid fa-circle-check text-emerald-600"></i> Montaj, Kol ve Talaşlı İmalat hazır yüklendi.
       </span>
-      <span id="lastSyncTime" class="text-[10px] text-slate-400 font-mono"></span>
+      <span id="lastSyncTime" class="text-[11px] text-slate-400 font-mono"></span>
     </div>
 
-    <!-- ARAMA MOTORU (EN ÜSTTE) -->
+    <!-- ARAMA MOTORU VE BÖLÜM BUTONLARI -->
     <section class="bg-white rounded-xl p-4 md:p-5 card-shadow border border-slate-200 space-y-3">
       <div class="relative">
         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-base">
@@ -63,41 +58,13 @@
           id="searchInput" 
           autofocus
           oninput="renderUI()" 
-          placeholder="Malzeme kodu yazın (örn: 11120154, 21036106) veya ad, raf, kat, kutu tipi arayın..." 
+          placeholder="Malzeme kodu yazın (örn: 11120154, 21036106) veya ad, raf, kutu tipi arayın..." 
           class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base font-semibold transition"
         >
       </div>
 
-      <!-- Kategori Filtre Butonları -->
+      <!-- Kategori Butonları (5 Bölüm) -->
       <div class="flex flex-wrap gap-2 text-xs font-medium" id="filterPillsContainer"></div>
-    </section>
-
-    <!-- YÖNETİCİ PANELİ (ŞİFRE: 1453) -->
-    <section id="adminUploadSection" class="hidden bg-white rounded-xl p-4 md:p-5 card-shadow border-2 border-dashed border-blue-300 space-y-3">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <div>
-          <h2 class="text-xs md:text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
-            <i class="fa-solid fa-sliders text-blue-600"></i> YÖNETİCİ KONTROL PANELİ
-          </h2>
-          <p class="text-[11px] text-slate-500 mt-0.5">Google E-Tablolar doğrudan bağlıdır. Tablolarınızda yaptığınız her değişiklik anında bu sayfaya yansır.</p>
-        </div>
-        <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Yönetici Aktif</span>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <a href="https://docs.google.com/spreadsheets/d/11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc/edit" target="_blank" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 flex items-center justify-between transition">
-          <span class="text-xs font-bold text-blue-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-2"></i>MONTAJ Tablosunu Aç</span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-blue-600"></i>
-        </a>
-        <a href="https://docs.google.com/spreadsheets/d/1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg/edit" target="_blank" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 flex items-center justify-between transition">
-          <span class="text-xs font-bold text-purple-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-2"></i>KOL Tablosunu Aç</span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-purple-600"></i>
-        </a>
-        <a href="https://docs.google.com/spreadsheets/d/1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME/edit" target="_blank" class="p-3 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 flex items-center justify-between transition">
-          <span class="text-xs font-bold text-amber-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-2"></i>TALAŞLI / POMPA / YARIMAMUL Tablosunu Aç</span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-amber-600"></i>
-        </a>
-      </div>
     </section>
 
     <!-- TABLO ALANI -->
@@ -121,8 +88,8 @@
               <th class="py-3 px-3 text-center text-indigo-700 font-extrabold">Kat</th>
               <th class="py-3 px-3 text-center text-emerald-700 font-extrabold">Sıra</th>
               <th class="py-3 px-3 text-center text-purple-700">Ambar</th>
-              <th class="py-3 px-3 text-center text-amber-700">Kutu Tipi</th>
-              <th class="py-3 px-3 text-center text-rose-700">Miktar</th>
+              <th class="py-3 px-3 text-center text-amber-700 font-extrabold">Kutu Tipi</th>
+              <th class="py-3 px-3 text-center text-rose-700 font-extrabold">Kapasite / Miktar</th>
             </tr>
           </thead>
           <tbody id="resultBody" class="divide-y divide-slate-100 text-slate-700">
@@ -137,16 +104,7 @@
   </main>
 
   <script>
-    const ADMIN_PASS = "1453";
-    let isAdminOpen = false;
-
-    // CANLI GOOGLE SHEETS TABLOLARI
-    const SHEETS_CONFIG = [
-      { id: "11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc", sheet: "Toplu Liste", defaultDept: "Montaj" },
-      { id: "1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg", sheet: "Toplu Liste", defaultDept: "Kol" },
-      { id: "1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME", sheet: "Güncel Liste", defaultDept: "Talaşlı İmalat" }
-    ];
-
+    // 3 DOSYADAN ÇIKAN VERİLER (Pompa ve Yarımamul listesi olmadığı için tamamen boş: 0 parça)
     const SECTIONS = [
       { id: "montaj", name: "Montaj" },
       { id: "kol", name: "Kol" },
@@ -155,125 +113,56 @@
       { id: "pompa", name: "Pompa Kumanda" }
     ];
 
+    const SHEETS_CONFIG = [
+      { id: "11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc", sheet: "Toplu Liste", dept: "Montaj" },
+      { id: "1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg", sheet: "Toplu Liste", dept: "Kol" },
+      { id: "1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME", sheet: "Güncel Liste", dept: "Talaşlı İmalat" }
+    ];
+
     let store = [];
     let currentFilter = "Tümü";
 
-    try {
-      const cached = localStorage.getItem("kanban_inventory_live_v1");
-      if (cached && JSON.parse(cached).length > 0) {
-        store = JSON.parse(cached);
-      }
-    } catch(e){}
-
     window.addEventListener("DOMContentLoaded", () => {
+      localStorage.clear();
       renderFilterPills();
       renderUI();
-      syncLiveGoogleSheets(false);
+      syncLiveSheets(false);
     });
 
-    async function syncLiveGoogleSheets(isManual) {
-      const statusText = document.getElementById("statusText");
-      const syncIcon = document.getElementById("syncIcon");
-      if (syncIcon) syncIcon.classList.add("fa-spin");
+    function renderFilterPills() {
+      const container = document.getElementById("filterPillsContainer");
+      const totalCount = store.length;
+      let html = `<button onclick="setFilter('Tümü')" class="filter-btn px-3 py-1.5 rounded-lg ${currentFilter === 'Tümü' ? 'bg-blue-600 text-white font-medium shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Tümü (${totalCount})</button>`;
 
-      statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-600"></i> Google E-Tablolar'dan güncel veriler alınıyor...`;
+      SECTIONS.forEach(sec => {
+        const cnt = store.filter(i => i.dept === sec.name).length;
+        const isActive = currentFilter === sec.name;
+        html += `<button onclick="setFilter('${sec.name}')" class="filter-btn px-3 py-1.5 rounded-lg ${isActive ? 'bg-blue-600 text-white font-medium shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">${sec.name} (${cnt})</button>`;
+      });
 
-      let allLiveItems = [];
+      container.innerHTML = html;
+    }
 
-      try {
-        for (const cfg of SHEETS_CONFIG) {
-          const url = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}&t=${new Date().getTime()}`;
-          
-          try {
-            const resp = await fetch(url);
-            const text = await resp.text();
-            
-            const jsonStr = text.replace(/^[/*\sO_o]*google\.visualization\.Query\.setResponse\(/, "").replace(/\);?\s*$/, "");
-            const parsed = JSON.parse(jsonStr);
+    function setFilter(dept) {
+      currentFilter = dept;
+      renderFilterPills();
+      renderUI();
+    }
 
-            if (parsed && parsed.table) {
-              const rows = parsed.table.rows;
-              const cols = parsed.table.cols.map(c => (c.label || "").trim().toLowerCase());
-
-              rows.forEach(r => {
-                const c = r.c;
-                if (!c) return;
-
-                let rowObj = {};
-                cols.forEach((colName, idx) => {
-                  if (c[idx]) {
-                    const val = (c[idx].f !== undefined && c[idx].f !== null) ? c[idx].f : c[idx].v;
-                    rowObj[colName] = (val !== null && val !== undefined) ? String(val).trim() : "";
-                  }
-                });
-
-                const getVal = (idx) => (c[idx] ? ((c[idx].f !== undefined ? c[idx].f : c[idx].v) || "") : "").toString().trim();
-                
-                let code = rowObj["stok kodu"] || rowObj["kod"] || rowObj["malzeme kodu"] || getVal(1);
-                if (code.endsWith(".0")) code = code.slice(0, -2);
-
-                let name = rowObj["stok adı"] || rowObj["stok adi"] || rowObj["kod adı"] || rowObj["kod adi"] || getVal(2);
-                let qty = rowObj["kutu kapasitesi"] || rowObj["toplu işleme miktarı"] || rowObj["kanban miktarı"] || rowObj["miktar"] || getVal(3);
-                if (qty.endsWith(".0")) qty = qty.slice(0, -2);
-                if (!qty) qty = "-";
-
-                let addr = rowObj["adresi"] || rowObj["adres"] || rowObj["kanban adresi"] || rowObj["talaşlı i̇malat kanban"] || getVal(4);
-                let ambar = rowObj["ambar adres"] || rowObj["ambar adresi"] || rowObj["ambar"] || getVal(5) || "-";
-                let kutu = rowObj["kutu tipi"] || rowObj["kutu"] || rowObj["kutu durumu"] || getVal(6) || "Kutu";
-                let desc = rowObj["açıklama"] || rowObj["kullanıldığı yer"] || getVal(7) || "";
-
-                if (code && code.length >= 3 && code.toLowerCase() !== "stok kodu" && code.toLowerCase() !== "kod") {
-                  let dept = cfg.defaultDept;
-                  if (cfg.defaultDept === "Talaşlı İmalat") {
-                    const combined = `${name} ${desc} ${addr}`.toUpperCase();
-                    if (["POMPA", "KUMANDA", "VANA", "VALF", "FPR", "OSR", "PISTON", "MEMBRAN", "C-145", "C-165", "C-71", "C-96"].some(w => combined.includes(w))) {
-                      dept = "Pompa Kumanda";
-                    } else if (["YARIMAMUL", "KAYNAK", "ŞASE", "SASE", "LOTUS", "DELTA", "AVANTRA"].some(w => combined.includes(w))) {
-                      dept = "Yarımamul";
-                    } else if (["KOL", "X KOL", "YATAY EKO", "D PRO"].some(w => combined.includes(w))) {
-                      dept = "Kol";
-                    }
-                  }
-
-                  const parsedAddr = parseShelfAddress(addr);
-
-                  allLiveItems.push({
-                    dept,
-                    code,
-                    name: name || "-",
-                    address: addr || "-",
-                    raf: parsedAddr.raf,
-                    kat: parsedAddr.kat,
-                    sira: parsedAddr.sira,
-                    ambar: ambar || "-",
-                    kutu: kutu || "Kutu",
-                    qty: qty || "-",
-                    desc: desc || ""
-                  });
-                }
-              });
-            }
-          } catch(err) {
-            console.warn(`Tablo okunamadı (${cfg.sheet}):`, err);
-          }
-        }
-
-        if (allLiveItems.length > 0) {
-          store = allLiveItems;
-          localStorage.setItem("kanban_inventory_live_v1", JSON.stringify(store));
-          const nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-          statusText.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Google E-Tablolar doğrudan senkronize edildi (${store.length} parça).`;
-          document.getElementById("lastSyncTime").innerText = `Son Güncelleme: ${nowStr}`;
-        } else {
-          statusText.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Çevrimdışı önbellek gösteriliyor (${store.length} parça).`;
-        }
-
-      } catch (e) {
-        statusText.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-600"></i> Canlı bağlantı hatası. Önbellekteki veriler gösteriliyor.`;
-      } finally {
-        if (syncIcon) syncIcon.classList.remove("fa-spin");
-        renderFilterPills();
-        renderUI();
+    function getKutuBadge(kutu) {
+      const k = (kutu || "").toLowerCase();
+      if (k.includes("plastik")) {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                  <i class="fa-solid fa-box text-[9px] mr-1 text-blue-600"></i>Plastik Kutu
+                </span>`;
+      } else if (k.includes("kazan")) {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-100 text-purple-800 border border-purple-200">
+                  <i class="fa-solid fa-cube text-[9px] mr-1 text-purple-600"></i>Kazan
+                </span>`;
+      } else {
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                  <i class="fa-solid fa-box-open text-[9px] mr-1 text-amber-600"></i>${kutu || 'Kutu'}
+                </span>`;
       }
     }
 
@@ -299,40 +188,92 @@
       return { raf, kat, sira };
     }
 
-    function renderFilterPills() {
-      const container = document.getElementById("filterPillsContainer");
-      const totalCount = store.length;
-      let html = `<button onclick="setFilter('Tümü')" class="filter-btn px-3 py-1.5 rounded-lg ${currentFilter === 'Tümü' ? 'bg-blue-600 text-white font-medium shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Tümü (${totalCount})</button>`;
+    async function syncLiveSheets(isManual) {
+      const syncIcon = document.getElementById("syncIcon");
+      if (syncIcon) syncIcon.classList.add("fa-spin");
 
-      SECTIONS.forEach(sec => {
-        const cnt = store.filter(i => i.dept === sec.name).length;
-        const isActive = currentFilter === sec.name;
-        html += `<button onclick="setFilter('${sec.name}')" class="filter-btn px-3 py-1.5 rounded-lg ${isActive ? 'bg-blue-600 text-white font-medium shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">${sec.name} (${cnt})</button>`;
-      });
+      let updatedStore = [];
 
-      container.innerHTML = html;
-    }
+      try {
+        for (const cfg of SHEETS_CONFIG) {
+          const url = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}&t=${new Date().getTime()}`;
+          
+          try {
+            const resp = await fetch(url);
+            const text = await resp.text();
+            const jsonStr = text.replace(/^[/*\sO_o]*google\.visualization\.Query\.setResponse\(/, "").replace(/\);?\s*$/, "");
+            const parsed = JSON.parse(jsonStr);
 
-    function setFilter(dept) {
-      currentFilter = dept;
-      renderFilterPills();
-      renderUI();
-    }
+            if (parsed && parsed.table) {
+              const rows = parsed.table.rows;
+              const cols = parsed.table.cols.map(c => (c.label || "").trim().toLowerCase());
 
-    function handleAdminToggle() {
-      if (!isAdminOpen) {
-        const pass = prompt("Yönetici moduna geçmek için şifreyi giriniz:");
-        if (pass === ADMIN_PASS) {
-          isAdminOpen = true;
-          document.getElementById("adminUploadSection").classList.remove("hidden");
-          document.getElementById("adminLockIcon").className = "fa-solid fa-lock-open text-emerald-400";
-        } else if (pass !== null) {
-          alert("Hatalı şifre!");
+              rows.forEach(r => {
+                const c = r.c;
+                if (!c) return;
+
+                let rowObj = {};
+                cols.forEach((colName, idx) => {
+                  if (c[idx]) {
+                    const val = (c[idx].f !== undefined && c[idx].f !== null) ? c[idx].f : c[idx].v;
+                    rowObj[colName] = (val !== null && val !== undefined) ? String(val).trim() : "";
+                  }
+                });
+
+                const getVal = (idx) => (c[idx] ? ((c[idx].f !== undefined ? c[idx].f : c[idx].v) || "") : "").toString().trim();
+                
+                let code = rowObj["stok kodu"] || rowObj["kod"] || rowObj["malzeme kodu"] || getVal(1) || getVal(0);
+                if (code.endsWith(".0")) code = code.slice(0, -2);
+
+                let name = rowObj["stok adı"] || rowObj["stok adi"] || rowObj["kod adı"] || rowObj["kod adi"] || getVal(2) || getVal(1);
+                let qty = rowObj["kutu kapasitesi"] || rowObj["toplu işleme miktarı"] || rowObj["kanban miktarı"] || rowObj["miktar"] || getVal(3);
+                if (qty.endsWith(".0")) qty = qty.slice(0, -2);
+                if (!qty) qty = "-";
+
+                let addr = rowObj["adresi"] || rowObj["adres"] || rowObj["kanban adresi"] || rowObj["talaşlı i̇malat kanban"] || getVal(4);
+                let ambar = rowObj["ambar adres"] || rowObj["ambar adresi"] || rowObj["ambar"] || getVal(5) || "-";
+                
+                let kutu = "Kutu";
+                if (cfg.dept === "Talaşlı İmalat") {
+                  kutu = "Plastik Kutu";
+                } else {
+                  let rawKutu = rowObj["kutu tipi"] || rowObj["kutu"] || getVal(6);
+                  if (rawKutu && rawKutu.toUpperCase().includes("KAZAN")) kutu = "Kazan";
+                }
+
+                if (code && /^\d{5,10}$/.test(code) && code.toLowerCase() !== "stok kodu" && code.toLowerCase() !== "kod") {
+                  const parsedAddr = parseShelfAddress(addr);
+                  updatedStore.push({
+                    dept: cfg.dept,
+                    code,
+                    name: name || "-",
+                    address: addr || "-",
+                    raf: parsedAddr.raf,
+                    kat: parsedAddr.kat,
+                    sira: parsedAddr.sira,
+                    ambar: ambar || "-",
+                    kutu,
+                    qty: qty || "-",
+                    desc: ""
+                  });
+                }
+              });
+            }
+          } catch(e) {}
         }
-      } else {
-        isAdminOpen = false;
-        document.getElementById("adminUploadSection").classList.add("hidden");
-        document.getElementById("adminLockIcon").className = "fa-solid fa-lock text-amber-400";
+
+        if (updatedStore.length > 0) {
+          store = updatedStore;
+          const nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+          document.getElementById("statusText").innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Google E-Tablolar doğrudan senkronize edildi (${store.length} parça).`;
+          document.getElementById("lastSyncTime").innerText = `Son Güncelleme: ${nowStr}`;
+        }
+
+      } catch (err) {
+      } finally {
+        if (syncIcon) syncIcon.classList.remove("fa-spin");
+        renderFilterPills();
+        renderUI();
       }
     }
 
@@ -364,7 +305,7 @@
 
       const tbody = document.getElementById("resultBody");
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-10 text-slate-400 font-medium">Eşleşen parça veya konum bulunamadı.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-12 text-slate-400 font-medium">Bu bölüme ait parça listesi bulunmamaktadır.</td></tr>`;
         return;
       }
 
@@ -376,7 +317,7 @@
           <td class="py-2.5 px-3 font-mono font-bold text-blue-700 text-xs whitespace-nowrap">${item.code}</td>
           <td class="py-2.5 px-3 min-w-[200px]">
             <div class="font-bold text-slate-800 text-xs">${item.name}</div>
-            ${item.desc ? `<div class="text-[10px] text-slate-400 font-medium mt-0.5"><i class="fa-solid fa-tag text-[9px] mr-1"></i>${item.desc}</div>` : ''}
+            ${item.desc ? `<div class="text-[10px] text-slate-500 font-medium mt-0.5"><i class="fa-solid fa-tag text-[9px] mr-1 text-slate-400"></i>${item.desc}</div>` : ''}
           </td>
           <td class="py-2.5 px-3 text-center whitespace-nowrap">
             <span class="inline-block px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">${item.address}</span>
@@ -386,9 +327,7 @@
           <td class="py-2.5 px-3 text-center font-extrabold text-emerald-800 bg-emerald-50/40 text-xs whitespace-nowrap">${item.sira}</td>
           <td class="py-2.5 px-3 text-center font-mono font-semibold text-purple-800 bg-purple-50/40 text-xs whitespace-nowrap">${item.ambar}</td>
           <td class="py-2.5 px-3 text-center whitespace-nowrap">
-            <span class="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-amber-100/70 text-amber-900 border border-amber-200">
-              <i class="fa-solid fa-box text-[9px] mr-1 text-amber-600"></i>${item.kutu}
-            </span>
+            ${getKutuBadge(item.kutu)}
           </td>
           <td class="py-2.5 px-3 text-center whitespace-nowrap">
             <span class="inline-block px-2.5 py-0.5 rounded text-xs font-mono font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
