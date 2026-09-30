@@ -3,597 +3,337 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kanban Kart ve Adres Takip</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <title>Kanban Kart ve Adres Takip Paneli</title>
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #f8fafc; color: #0f172a; padding-bottom: 50px; }
-
-    header { background: #0f172a; color: white; position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 16px; }
-    .header-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.15rem; }
-    .logo span { color: #38bdf8; }
-    .sub { font-size: 0.72rem; color: #94a3b8; font-weight: 400; }
-
-    .top-actions { display: flex; align-items: center; gap: 8px; }
-    .btn { padding: 7px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.15s; }
-    .btn-dark { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
-    .btn-dark:hover { background: #334155; }
-    .btn-green { background: #10b981; color: white; }
-    .btn-green:hover { background: #059669; }
-    .btn-blue { background: #2563eb; color: white; }
-    .count-badge { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; }
-    .count-badge strong { color: #38bdf8; font-family: monospace; font-size: 0.85rem; }
-
-    main { max-width: 1300px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-    .card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 14px; }
-
-    .search-box { position: relative; width: 100%; }
-    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: #64748b; }
-    .search-input { width: 100%; padding: 13px 14px 13px 44px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 1rem; font-weight: 600; outline: none; transition: 0.2s; color: #0f172a; }
-    .search-input:focus { background: #fff; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
-
-    .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .pill { padding: 6px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; transition: 0.15s; }
-    .pill.active { background: #2563eb; color: white; border-color: #2563eb; }
-    .pill:hover:not(.active) { background: #e2e8f0; }
-
-    .admin-panel { border: 2px dashed #93c5fd; background: #f8fafc; }
-    .upload-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
-    .upload-card { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; }
-    .upload-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.75rem; font-weight: 700; color: #1e293b; }
-    .upload-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 6px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; color: #334155; }
-    .upload-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
-
-    .table-card { overflow: hidden; background: white; border-radius: 12px; border: 1px solid #e2e8f0; }
-    .table-top { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fafafa; font-size: 0.72rem; font-weight: 700; color: #475569; }
-    .table-scroll { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem; }
-    th { background: #f1f5f9; padding: 9px 10px; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; white-space: nowrap; }
-    td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-    tr:hover { background: #f8fafc; }
-
-    .code { font-family: monospace; font-weight: 800; color: #1d4ed8; font-size: 0.85rem; }
-    .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 600; background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569; white-space: nowrap; }
-    .address { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-family: monospace; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.74rem; white-space: nowrap; }
-    .c-raf { color: #1e40af; font-weight: 800; text-align: center; background: rgba(239, 246, 255, 0.45); font-size: 0.82rem; }
-    .c-kat { color: #3730a3; font-weight: 800; text-align: center; background: rgba(238, 242, 255, 0.45); font-size: 0.82rem; }
-    .c-sira { color: #065f46; font-weight: 800; text-align: center; background: rgba(236, 253, 245, 0.45); font-size: 0.82rem; }
-    .c-ambar { color: #6b21a8; font-weight: 800; text-align: center; background: rgba(250, 245, 255, 0.45); font-family: monospace; font-size: 0.8rem; }
-    .c-qty { text-align: center; font-family: monospace; font-weight: 700; color: #0f172a; }
-
-    .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 14px; }
-    .modal-body { background: white; border-radius: 14px; max-width: 480px; width: 100%; padding: 18px; max-height: 90vh; overflow-y: auto; }
-    .form-row { margin-bottom: 10px; }
-    .form-row label { display: block; font-size: 0.72rem; font-weight: 700; margin-bottom: 3px; color: #334155; }
-    .form-input { width: 100%; padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; outline: none; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-
-    .hidden { display: none !important; }
+    * { -webkit-tap-highlight-color: transparent; }
+    .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06); }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
 
-  <header>
-    <div class="header-inner">
+  <!-- Üst Başlık / Header -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
       <div>
-        <div class="logo">📦 KANBAN <span>TAKİP</span></div>
-        <div class="sub">Talaşlı İmalat | Montaj | Kol | Yarımamul | Pompa Kumanda</div>
+        <h1 class="text-base md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <i class="fa-solid fa-boxes-stacked text-blue-400"></i> KANBAN KART VE ADRES TAKİP
+        </h1>
+        <p class="text-[11px] md:text-xs text-slate-400">Montaj | Kol | Talaşlı İmalat | Yarımamul | Pompa Kumanda</p>
       </div>
 
-      <div class="top-actions">
-        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="btn btn-dark">
-          <span id="adminLockIcon">🔒</span>
-          <span id="adminBtnText">Dosya Yükle / Düzenle</span>
+      <div class="flex items-center gap-2">
+        <button onclick="syncLiveGoogleSheets(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+          <i id="syncIcon" class="fa-solid fa-arrows-rotate text-blue-400"></i>
+          <span id="syncBtnText" class="hidden sm:inline">Listeyi Yenile</span>
         </button>
 
-        <button id="addManualBtn" onclick="openModal()" class="btn btn-green hidden">
-          ➕ Yeni Ekle
+        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+          <i id="adminLockIcon" class="fa-solid fa-lock text-amber-400"></i>
+          <span id="adminBtnText" class="hidden sm:inline">Yönetici</span>
         </button>
 
-        <div class="count-badge">
-          Toplam: <strong id="totalCount">0</strong>
-        </div>
+        <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg font-mono">
+          Toplam: <strong id="totalCount" class="text-blue-400 text-sm">0</strong>
+        </span>
       </div>
     </div>
   </header>
 
-  <main>
+  <main class="max-w-7xl mx-auto p-3 md:p-6 space-y-4">
+
+    <!-- Canlı Senkronizasyon Durum Bildirimi -->
+    <div id="statusAlert" class="text-xs bg-blue-50 border border-blue-200 text-blue-800 px-3.5 py-2 rounded-xl flex items-center justify-between shadow-sm">
+      <span id="statusText" class="flex items-center gap-2">
+        <i class="fa-solid fa-cloud-arrow-down text-blue-600"></i> Google E-Tablolar'a canlı bağlanıyor...
+      </span>
+      <span id="lastSyncTime" class="text-[10px] text-slate-400 font-mono"></span>
+    </div>
+
     <!-- ARAMA MOTORU (EN ÜSTTE) -->
-    <section class="card">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
+    <section class="bg-white rounded-xl p-4 md:p-5 card-shadow border border-slate-200 space-y-3">
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-base">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
         <input 
           type="text" 
           id="searchInput" 
           autofocus
           oninput="renderUI()" 
-          placeholder="Malzeme kodu yazın (örn: 21036106, 21010827) veya ad, raf, kat, sıra, ambar..." 
-          class="search-input"
+          placeholder="Malzeme kodu yazın (örn: 11120154, 21036106) veya ad, raf, kat, kutu tipi arayın..." 
+          class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base font-semibold transition"
         >
       </div>
 
-      <div class="pills">
-        <button onclick="setFilter('Tümü')" class="pill active filter-btn">Tümü</button>
-        <button onclick="setFilter('Talaşlı İmalat')" class="pill filter-btn">Talaşlı İmalat</button>
-        <button onclick="setFilter('Montaj')" class="pill filter-btn">Montaj</button>
-        <button onclick="setFilter('Kol')" class="pill filter-btn">Kol</button>
-        <button onclick="setFilter('Yarımamul')" class="pill filter-btn">Yarımamul</button>
-        <button onclick="setFilter('Pompa Kumanda')" class="pill filter-btn">Pompa Kumanda</button>
+      <!-- Kategori Filtre Butonları -->
+      <div class="flex flex-wrap gap-2 text-xs font-medium" id="filterPillsContainer"></div>
+    </section>
+
+    <!-- YÖNETİCİ PANELİ (ŞİFRE: 1453) -->
+    <section id="adminUploadSection" class="hidden bg-white rounded-xl p-4 md:p-5 card-shadow border-2 border-dashed border-blue-300 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div>
+          <h2 class="text-xs md:text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-blue-600"></i> YÖNETİCİ KONTROL PANELİ
+          </h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">Google E-Tablolar doğrudan bağlıdır. Tablolarınızda yaptığınız her değişiklik anında bu sayfaya yansır.</p>
+        </div>
+        <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Yönetici Aktif</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <a href="https://docs.google.com/spreadsheets/d/11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc/edit" target="_blank" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 flex items-center justify-between transition">
+          <span class="text-xs font-bold text-blue-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-2"></i>MONTAJ Tablosunu Aç</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-blue-600"></i>
+        </a>
+        <a href="https://docs.google.com/spreadsheets/d/1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg/edit" target="_blank" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 flex items-center justify-between transition">
+          <span class="text-xs font-bold text-purple-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-2"></i>KOL Tablosunu Aç</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-purple-600"></i>
+        </a>
+        <a href="https://docs.google.com/spreadsheets/d/1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME/edit" target="_blank" class="p-3 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 flex items-center justify-between transition">
+          <span class="text-xs font-bold text-amber-900"><i class="fa-solid fa-file-excel text-emerald-600 mr-2"></i>TALAŞLI / POMPA / YARIMAMUL Tablosunu Aç</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-amber-600"></i>
+        </a>
       </div>
     </section>
 
-    <!-- ŞİFRELİ DOSYA YÜKLEME ALANI (ŞİFRE: 1453) -->
-    <section id="adminUploadSection" class="card admin-panel hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong style="font-size:0.8rem; color:#1e293b;">📂 BÖLÜM LİSTESİ YÜKLE / GÜNCELLE (.XLSX)</strong>
-        <span style="font-size:0.68rem; background:#dcfce7; color:#166534; padding:2px 8px; border-radius:12px; font-weight:700;">🔓 Yönetici Açık</span>
-      </div>
-      <p style="font-size:0.72rem; color:#64748b; margin-top:3px;">Dosya seçtiğinizde o bölümün eski kayıtları silinip yeni Excel kayıtları yüklenir.</p>
-
-      <div class="upload-grid" id="deptUploadGrid"></div>
-    </section>
-
-    <!-- LİSTELEME TABLOSU -->
-    <div class="table-card">
-      <div class="table-top">
-        <span>BULUNAN PARÇA VE ADRESLER</span>
-        <span id="resultInfo" style="font-family:monospace; font-weight:bold;">0 kayıt</span>
+    <!-- TABLO ALANI -->
+    <section class="bg-white rounded-xl card-shadow border border-slate-200 overflow-hidden">
+      <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+          <i class="fa-solid fa-list-check text-blue-600"></i> Bulunan Parçalar ve Konumlar
+        </span>
+        <span id="resultInfo" class="text-xs text-slate-500 font-mono">0 kayıt</span>
       </div>
 
-      <div class="table-scroll">
-        <table>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr>
-              <th>Bölüm</th>
-              <th>Malzeme Kodu</th>
-              <th>Malzeme Adı</th>
-              <th style="text-align:center;">Kanban Adresi</th>
-              <th style="text-align:center; color:#1e40af;">Raf</th>
-              <th style="text-align:center; color:#3730a3;">Kat</th>
-              <th style="text-align:center; color:#065f46;">Sıra</th>
-              <th style="text-align:center; color:#6b21a8;">Ambar Adresi</th>
-              <th style="text-align:center;">Kutu Tipi</th>
-              <th style="text-align:center;">Miktar</th>
-              <th id="thAction" style="text-align:center;" class="hidden">İşlem</th>
+            <tr class="bg-slate-100 text-slate-700 uppercase font-bold border-b border-slate-200 text-[11px]">
+              <th class="py-3 px-3">Bölüm</th>
+              <th class="py-3 px-3">Malzeme Kodu</th>
+              <th class="py-3 px-3">Malzeme Adı</th>
+              <th class="py-3 px-3 text-center">Kanban Adresi</th>
+              <th class="py-3 px-3 text-center text-blue-700 font-extrabold">Raf</th>
+              <th class="py-3 px-3 text-center text-indigo-700 font-extrabold">Kat</th>
+              <th class="py-3 px-3 text-center text-emerald-700 font-extrabold">Sıra</th>
+              <th class="py-3 px-3 text-center text-purple-700">Ambar</th>
+              <th class="py-3 px-3 text-center text-amber-700">Kutu Tipi</th>
+              <th class="py-3 px-3 text-center text-rose-700">Miktar</th>
             </tr>
           </thead>
-          <tbody id="resultBody">
+          <tbody id="resultBody" class="divide-y divide-slate-100 text-slate-700">
             <tr>
-              <td colspan="11" style="text-align:center; padding:35px; color:#94a3b8;">
-                Yükleniyor...
-              </td>
+              <td colspan="10" class="text-center py-10 text-slate-400">Veriler yükleniyor...</td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
+
   </main>
-
-  <!-- MODAL: YENİ MALZEME EKLE -->
-  <div id="addModal" class="modal hidden">
-    <div class="modal-body">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
-        <strong style="font-size:0.85rem;">➕ Yeni Malzeme Ekle</strong>
-        <button onclick="closeModal()" style="border:none; background:none; font-size:1.1rem; cursor:pointer;">✖</button>
-      </div>
-
-      <form id="addMaterialForm" onsubmit="handleManualAdd(event)">
-        <div class="form-row">
-          <label>Bölüm *</label>
-          <select id="mDept" class="form-input" required>
-            <option value="Talaşlı İmalat">Talaşlı İmalat</option>
-            <option value="Montaj">Montaj</option>
-            <option value="Kol">Kol</option>
-            <option value="Yarımamul">Yarımamul</option>
-            <option value="Pompa Kumanda">Pompa Kumanda</option>
-          </select>
-        </div>
-
-        <div class="grid-2 form-row">
-          <div>
-            <label>Malzeme Kodu *</label>
-            <input type="text" id="mCode" required placeholder="örn: 21036106" class="form-input" style="font-weight:bold; font-family:monospace;">
-          </div>
-          <div>
-            <label>Miktar</label>
-            <input type="text" id="mQty" placeholder="örn: 75" class="form-input">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <label>Malzeme Adı *</label>
-          <input type="text" id="mName" required placeholder="örn: BORU X KOL..." class="form-input" style="text-transform:uppercase;">
-        </div>
-
-        <div class="form-row">
-          <label>Tam Kanban Adresi</label>
-          <input type="text" id="mAddress" oninput="syncFromFullAddress()" placeholder="örn: R1-K1 K2-S1" class="form-input" style="font-family:monospace; text-transform:uppercase;">
-        </div>
-
-        <div class="grid-3 form-row">
-          <div>
-            <label>Raf</label>
-            <input type="text" id="mRaf" placeholder="R1" class="form-input" style="text-align:center; font-weight:bold;">
-          </div>
-          <div>
-            <label>Kat</label>
-            <input type="text" id="mKat" placeholder="K1 K2" class="form-input" style="text-align:center; font-weight:bold;">
-          </div>
-          <div>
-            <label>Sıra</label>
-            <input type="text" id="mSira" placeholder="S1" class="form-input" style="text-align:center; font-weight:bold;">
-          </div>
-        </div>
-
-        <div class="grid-2 form-row">
-          <div>
-            <label>Ambar Adresi</label>
-            <input type="text" id="mAmbar" placeholder="örn: A-12" class="form-input" style="font-family:monospace; text-transform:uppercase;">
-          </div>
-          <div>
-            <label>Kutu Tipi</label>
-            <input type="text" id="mKutu" placeholder="örn: Plastik" class="form-input">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <label>Açıklama / Kullanıldığı Yer</label>
-          <input type="text" id="mDesc" placeholder="örn: POMPA, MONTAJ..." class="form-input">
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
-          <button type="button" onclick="closeModal()" class="btn" style="background:#f1f5f9; color:#475569;">İptal</button>
-          <button type="submit" class="btn btn-green">Kaydet</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <script>
     const ADMIN_PASS = "1453";
     let isAdminOpen = false;
 
-    const SECTIONS = [
-      { id: "talasli", name: "Talaşlı İmalat", icon: "⚙️" },
-      { id: "montaj", name: "Montaj", icon: "🔧" },
-      { id: "kol", name: "Kol", icon: "📊" },
-      { id: "yarimamul", name: "Yarımamul", icon: "📦" },
-      { id: "pompa", name: "Pompa Kumanda", icon: "🎛️" }
+    // CANLI GOOGLE SHEETS TABLOLARI
+    const SHEETS_CONFIG = [
+      { id: "11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc", sheet: "Toplu Liste", defaultDept: "Montaj" },
+      { id: "1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg", sheet: "Toplu Liste", defaultDept: "Kol" },
+      { id: "1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME", sheet: "Güncel Liste", defaultDept: "Talaşlı İmalat" }
     ];
 
-    // İÇİNE GÖMÜLÜ 185 PARÇALIK HAZIR VERİ
-    const EMBEDDED_DATA = [{"dept": "Talaşlı İmalat", "code": "21010827", "name": "CIVATA OZEL PISTON KAUCUK BAG. M12X21MM KROM", "address": "R3-K1 K2-S4", "raf": "R3", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21036608", "name": "KORTAPA AKB CELIK UZUN G1/4\"XAA17X22MM GALVANIZLI", "address": "R4-K1 K2-S3", "raf": "R4", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21036653", "name": "NIPEL CELIK G3/4\"E-G3/4\"E GALVANIZLI", "address": "R11-K1 K2-S3", "raf": "R11", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21015554", "name": "NIPEL REDUKSIYON CELIK G3/4\"E-G1/2\"E", "address": "R11-K1 K2-S4", "raf": "R11", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21038137", "name": "NIPEL REDUKSIYON CELIK G3/8\"E-G3/8\"D", "address": "R11-K1 K2-S5", "raf": "R11", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21010767", "name": "REDUKSIYON ALTIKOSE CELIK G1/2E\"-G3/8\"D", "address": "R12-K1 K2-S3", "raf": "R12", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21017307", "name": "SAPLAMA M10X54MM", "address": "R12-K1 K2-S4", "raf": "R12", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21017315", "name": "SOMUN OZEL M10X18,5 SIYAH", "address": "R12-K3 K4-S4", "raf": "R12", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010053", "name": "PUL TEFLON POMPA C-145 Ø60XØ35X12XMM", "address": "R11-K3 K4-S4", "raf": "R11", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21010054", "name": "PUL TEFLON POMPA C-145 Ø78,3XØ55,4X25,1XMM", "address": "R11-K3 K4-S5", "raf": "R11", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21010747", "name": "SAPLAMA MEMBRAN BAG. YIVLI M12X28,3MM", "address": "R17-K1 K2-S2", "raf": "R17", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028450", "name": "TAPA PLASTIK CIFT ORINGLI Ø56X24MM", "address": "R13-K1 K2-S1", "raf": "R13", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "POMPA"}, {"dept": "Talaşlı İmalat", "code": "21032818", "name": "MIL BURC CELIK Ø55XØ40X16MM C-165", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028459", "name": "BURC POMPA C-165 Ø70X55X19,5MM", "address": "R17-K3 K4-S3", "raf": "R17", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028460", "name": "PUL POMPA C-165 Ø115XØ55X3,5MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028665", "name": "RAKOR PIRINC Y DIRSEK POMPA C-165", "address": "R17-K3 K4-S1", "raf": "R17", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038253", "name": "BURC VALF BASKI HAP Ø22X10MM", "address": "R3-K1 K2-S3", "raf": "R3", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010041", "name": "BURC BASINC AYAR YUZUK OSR Ø29XØ14X9,5MM", "address": "R2-K1 K2-S5", "raf": "R2", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010047", "name": "BURC Ø20XØ10X10MM", "address": "R2-K3 K4-S2", "raf": "R2", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010052", "name": "BURC ORING YUVALI Ø22XØ10X11MM", "address": "R3-K1 K2-S1", "raf": "R3", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010373", "name": "MIL KADEMELI Ø10X72MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038254", "name": "SOMUN PISTON AYAR Ø24,75X45MM", "address": "R8-K1 K2-S1", "raf": "R8", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010058", "name": "YUZUK ALIN KARSILIGI OSR Ø24X21MM", "address": "R13-K1 K2-S2", "raf": "R13", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010020", "name": "YUZUK KROM Ø23,25Ø19,90X20,60", "address": "R13-K1 K2-S3", "raf": "R13", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010393", "name": "MIL MEMBRAN BASKI FPR 20 Ø25X43MM", "address": "R8-K1 K2-S2", "raf": "R8", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010297", "name": "MIL YUZUK ALIN KARSILIGI FPR 20 GALVANIZLI", "address": "R11-K1 K2-S2", "raf": "R11", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038195", "name": "RAKOR CIKIS DUZ PIRINC G1/2\"E", "address": "R12-K1 K2-S1", "raf": "R12", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010402", "name": "MIL MANDAL FPR Ø7X121MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010413", "name": "PAPATYA KOL BAG. GENIS 10M", "address": "10 M KOL -KAYNAKHANEYE VERİLİYOR", "raf": "-", "kat": "KAYNAKHANEYE VERİLİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010412", "name": "PAPATYA KOL BAG. DAR 10M", "address": "10 M KOL -KAYNAKHANEYE VERİLİYOR", "raf": "-", "kat": "KAYNAKHANEYE VERİLİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010415", "name": "PAPATYA KOL GENIS BAG. 12M", "address": "12 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010414", "name": "PAPATYA KOL DAR BAG. 12M", "address": "12 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21027765", "name": "PAPATYA 15M X KOL DISI CELIK DOKUM", "address": "15 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21027766", "name": "PAPATYA 15M X KOL ERKEK CELIK DOKUM", "address": "15 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010049", "name": "BURC Ø25X11,5X27MM", "address": "10 M KOL -KAYNAKHANEYE VERİLİYOR", "raf": "-", "kat": "KAYNAKHANEYE VERİLİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010323", "name": "KARE MIL 30X30X38MM", "address": "10 M KOL -KAYNAKHANEYE VERİLİYOR", "raf": "-", "kat": "KAYNAKHANEYE VERİLİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010361", "name": "MIL 10M MANUEL KOL YAY BAG. YIVLI Ø25X314MM", "address": "10 M KOL -KAYNAKHANEYE VERİLİYOR", "raf": "-", "kat": "KAYNAKHANEYE VERİLİYOR", "sira": "-", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010749", "name": "MIL ALTIGEN AA36X8MM", "address": "10 M KOL -KAYNAKHANEYE VERİLİYOR", "raf": "-", "kat": "KAYNAKHANEYE VERİLİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010390", "name": "MIL MARPUC GALVANIZLI 10X39MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "HORTUM MONTAJ"}, {"dept": "Talaşlı İmalat", "code": "21010322", "name": "KARE MIL 25X25X55MM", "address": "12 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010362", "name": "MIL 12M MANUEL KOL YAY BAG. YIVLI Ø24X387,5MM", "address": "12 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010396", "name": "MIL Ø30X175MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010419", "name": "MIL YAY BAG. Ø30X145MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010040", "name": "BURC 16M MANUEL KOL KILIT Ø26XØ12,5X12,9MM GALVANIZLI", "address": "R2-K1 K2-S4", "raf": "R2", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010365", "name": "MIL ALTIKOSE SOMUN AYAR M16 AA27X30MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010374", "name": "MIL YAY BAG. 16M Ø22X75MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010397", "name": "MIL Ø30X30MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010375", "name": "MIL YAY BAG. 16M Ø22X90MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010048", "name": "BURC Ø24X12,5X30MM", "address": "16 M KOL -KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21037247", "name": "GOVDE KULAKLI MINI BASINC FILTRESI(ALUMINYUM)", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037248", "name": "KAPAK MINI BASINC FILTRE Ø45X24,5MM(ALUMINYUM)", "address": "R3-K3 K4-S4", "raf": "R3", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": "KOL-MAKİNELER"}, {"dept": "Talaşlı İmalat", "code": "21036764", "name": "SOMUN MARPUC GALVANIZLI 10LUK(39 MARPUC)", "address": "R12-K3 K4-S2", "raf": "R12", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "HORTUM MONTAJ"}, {"dept": "Talaşlı İmalat", "code": "21010411", "name": "MIL YIVLI M12 Ø14X98MM", "address": "R11-K1 K2-S1", "raf": "R11", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010408", "name": "MIL UCU M12 YIVLI Ø14X820MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010045", "name": "BURC KADEMELI Ø35XØ20,3X40MM", "address": "15 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010395", "name": "MIL Ø14X100MM", "address": "15 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010057", "name": "BURC SAPKALI Ø40XØ24,5X17MM", "address": "15 M KOL-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010426", "name": "PIM TEKER Ø20X135MM", "address": "DELTA ŞASE-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21025427", "name": "MIL Ø25X65MM", "address": "LOTUS ŞASE-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010070", "name": "GIJON M10X105MM", "address": "DELTALAR-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010420", "name": "PIM BIDON BAG. Ø10X60MM", "address": "DELTALAR-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010069", "name": "GIJON M10X75MM", "address": "DELTALAR-KAYNAKHANEYE GİDİYOR", "raf": "-", "kat": "KAYNAKHANEYE GİDİYOR", "sira": "-", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21011412", "name": "MIL YAN KOL GALVANIZLI Ø24,5X210MM", "address": "R14-K3 K4-S2", "raf": "R14", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "iş emri verildi yapıldı", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010427", "name": "MIL ORTA KOL BAG. GALVANIZLI Ø30X132MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21032444", "name": "MIL BURC Ø50X55MM", "address": "R7-K3 K4-S1", "raf": "R7", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010364", "name": "MIL ALTIKOSE SOMUN AYAR M16 AA24,5X30MM", "address": "R4-K3 K4-S3", "raf": "R4", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "ORTA KOL"}, {"dept": "Talaşlı İmalat", "code": "21032477", "name": "MIL BURC Ø50X45", "address": "R7-K1 K2-S5", "raf": "R7", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21032482", "name": "MIL BURC 40X30MM", "address": "R5-K1 K2-S1", "raf": "R5", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21022100", "name": "MIL ALTIKOSE 15M OTO. KOL MIL UST AA27X8MM", "address": "R4-K3 K4-S1", "raf": "R4", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21032528", "name": "MIL CIVATA Ø20X246MM YARIM PASOLU", "address": "R7-K3 K4-S2", "raf": "R7", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "BOŞ/600 adet fasondAN GELECEK", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21010852", "name": "BORU KIZAK SINIRLANDIRICI ARASI Ø15XØ21X52MM", "address": "R1-K3 K4-S1", "raf": "R1", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010018", "name": "BORU Ø17XØ13X305MM", "address": "R1-K3 K4-S5", "raf": "R1", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": "MONTAJ KAYNAK 15-18M YATAY EKO KILIT"}, {"dept": "Talaşlı İmalat", "code": "21035638", "name": "BORU YATAY EKO MANUEL KILIT Ø27X305X360MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010387", "name": "BORU ORTA KOL LIFT BAG. Ø35XØ20,5X92MM", "address": "R2-K1 K2-S3", "raf": "R2", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21032523", "name": "BORU 42,4X3,2X65MM", "address": "R1-K1 K2-S2", "raf": "R1", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21011348", "name": "BURC Ø22XØ13X12,5MM", "address": "R2-K3 K4-S3", "raf": "R2", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21032856", "name": "MIL BURC X KOL Ø24X57MM", "address": "R5-K1 K2-S3", "raf": "R5", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21035084", "name": "MIL BURC CELIK Ø35XØ16,6X14,7MM", "address": "R6-K3 K4-S4", "raf": "R6", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010321", "name": "KARE BASLI CIVATA M20 AA20X105MM", "address": "R3-K3 K4-S5", "raf": "R3", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21012638", "name": "MIL Ø22X80MM ALFA3 MIKSER KILIT", "address": "R8-K1 K2-S5", "raf": "R8", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21024890", "name": "MIL Ø30X26MM", "address": "R8-K3 K4-S5", "raf": "R8", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21023981", "name": "BORU LOTUS CEKI OKU Ø33,7X3X120MM", "address": "R1-K3 K4-S2", "raf": "R1", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21037562", "name": "BORU BURC AVANTRAX180MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037566", "name": "MIL PIM AVANTRA Ø20X197MM", "address": "R9-K3 K4-S3", "raf": "R9", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "1 kutu boş /200 fasondan gelecek", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21037576", "name": "MIL PIM AVANTRA M39X4,00 Ø70X292MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037573", "name": "MIL AVANTRA 165X95X50MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037574", "name": "BORU AVANTRA Ø102X14X180MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037570", "name": "MIL BURC AVANTRA Ø25X34MM", "address": "R5-K1 K2-S4", "raf": "R5", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21038563", "name": "MIL KUMANDA DIREGI KILIT Ø22X85MM", "address": "R7-K3 K4-S5", "raf": "R7", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21037604", "name": "MIL BURC Ø30X20MM", "address": "R5-K3 K4-S1", "raf": "R5", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "AVANTRA OK POMPA SACI"}, {"dept": "Talaşlı İmalat", "code": "21038607", "name": "MIL Ø8MM HALAT UCU Ø12X150MM", "address": "R9-K1 K2-S5", "raf": "R9", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037632", "name": "BORU LOTUS DINGIL Ø33,7X3,2X671,7MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037764", "name": "MIL YAY MEKANIZMA YUZUGU 5 YOLLU VANA Ø8,5X9", "address": "R13-K1 K2-S4", "raf": "R13", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037759", "name": "MIL RAKOR GRESORLUK 5 YOLLU VANA AA12X28MM ERKEK M6-DISI M6", "address": "R10-K1 K2-S5", "raf": "R10", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037748", "name": "RAKOR FLANSLI ALUMINYUM 5 YOLLU VANA 55X55 G3/4\" DISI NIKELAJ KAP.", "address": "R12-K1 K2-S2", "raf": "R12", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037760", "name": "MIL KOL 5 YOLLU VANA Ø10X120MM", "address": "R7-K3 K4-S4", "raf": "R7", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037763", "name": "PUL DELRIN Ø20,5X31X1", "address": "R11-K3 K4-S3", "raf": "R11", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21029373", "name": "MIL Ø25X45MM", "address": "R8-K3 K4-S1", "raf": "R8", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21024920", "name": "MIL Ø30X10MM", "address": "R8-K3 K4-S3", "raf": "R8", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "KAYNAKHANE"}, {"dept": "Talaşlı İmalat", "code": "21022455", "name": "BORU MAKARA Ø60X3X160MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21023755", "name": "MIL BURC MAKARA IC 15M OTO. Ø30X271MM", "address": "R5-K3 K4-S3", "raf": "R5", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010295", "name": "INSERT M8", "address": "R3-K3 K4-S3", "raf": "R3", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036669", "name": "SOMUN DEPO INSERT 3/4\"", "address": "R12-K1 K2-S5", "raf": "R12", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038361", "name": "INSERT M6 PIRINC", "address": "R3-K3 K4-S2", "raf": "R3", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": "FPR KUMANDA"}, {"dept": "Talaşlı İmalat", "code": "21012384", "name": "SOMUN OZEL INSERT  PIRINC M10", "address": "R12-K3 K4-S3", "raf": "R12", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038313", "name": "SOMUN INSERT 1/4\" PIRINC", "address": "R12-K3 K4-S1", "raf": "R12", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "Plastik", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21025603", "name": "MIL BURC X KOL ORTA Ø40X24X17MM", "address": "R7-K1 K2-S1", "raf": "R7", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036433", "name": "MIL BURC X KOL Ø30X104MM", "address": "R5-K1 K2-S5", "raf": "R5", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028636", "name": "MIL Ø14X200MM", "address": "R8-K1 K2-S4", "raf": "R8", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036575", "name": "MIL BURC X KOL Ø30X77MM", "address": "R6-K1 K2-S1", "raf": "R6", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "DOLU/900 adet fasondan gelecek", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036394", "name": "MIL X KOL ACAR Ø30X20,5X77MM", "address": "R10-K3 K4-S1", "raf": "R10", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037683", "name": "MIL BURC X KOL UC KIRMA Ø50X17MM", "address": "R7-K1 K2-S4", "raf": "R7", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "DOLU/1000 fasondan gelecek", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038662", "name": "MIL BURC X KOL ILK ACAR Ø31X35MM", "address": "R6-K1 K2-S3", "raf": "R6", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "1100 adet fasondan gelecek", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036583", "name": "MIL BURC X KOL ILK ACAR Ø30X22MM", "address": "R5-K3 K4-S2", "raf": "R5", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21025617", "name": "MIL KARE SOMUN AYAR M16 30X40MM", "address": "R7-K3 K4-S3", "raf": "R7", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21029478", "name": "MIL PIM X KOL Ø24X440MM", "address": "R10-K1 K2-S3", "raf": "R10", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036106", "name": "BORU X KOL ILK ACAR Ø48,3X5,0X367MM", "address": "R1-K1 K2-S1", "raf": "R1", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "12241581", "name": "TAKOZ KESTAMIT M10XØ40X50MM", "address": "R12-K3 K4-S5", "raf": "R12", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039262", "name": "MIL ALFA-LOTUS YUKSEKLIK MAKARA Ø150X30MM", "address": "R14-K1 K2-S1", "raf": "R14", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21035959", "name": "MIL ALTIKOSE 15M OTO. KOL MIL UST AA27X8MM", "address": "R4-K3 K4-S2", "raf": "R4", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21032440", "name": "MIL BURC ALTIKOSE AA27X30MM M16", "address": "R5-K1 K2-S2", "raf": "R5", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21035085", "name": "MIL PIM M20 Ø30X40X40MM", "address": "R9-K3 K4-S4", "raf": "R9", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "DOLU/500 adet fasondan gelecek", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21032811", "name": "BORU Ø27X2,5X39MM", "address": "R2-K1 K2-S2", "raf": "R2", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21032808", "name": "BORU 33,7X27,1X62MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21023092", "name": "MIL Ø35X190MM P2000 ORTAK SASE CEKI OKU PIM", "address": "R9-K1 K2-S3", "raf": "R9", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037326", "name": "MIL BURC Ø35X58MM", "address": "R6-K3 K4-S2", "raf": "R6", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": "PARALELOGRAM"}, {"dept": "Talaşlı İmalat", "code": "21027941", "name": "MIL Ø30X60MM", "address": "R9-K1 K2-S2", "raf": "R9", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21027904", "name": "MIL Ø35X81MM", "address": "R9-K1 K2-S4", "raf": "R9", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037269", "name": "MIL BURC LOTUS D 30 MIKSER BAG. Ø30X90MM", "address": "R9-K3 K4-S1", "raf": "R9", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037264", "name": "MIL BURC 30X17MM", "address": "R4-K3 K4-S5", "raf": "R4", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037563", "name": "MIL PIM Ø45X260MM", "address": "R10-K1 K2-S1", "raf": "R10", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": "AVANTRA"}, {"dept": "Talaşlı İmalat", "code": "21037575", "name": "BORU BURC BRONZ AVANTRA Ø86X40MM", "address": "R1-K1 K2-S3", "raf": "R1", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": "AVANTRA"}, {"dept": "Talaşlı İmalat", "code": "21037560", "name": "BORU BURC BRONZ Ø65X12,5X40MM", "address": "R1-K1 K2-S4", "raf": "R1", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": "AVANTRA"}, {"dept": "Talaşlı İmalat", "code": "21039275", "name": "SAC B.SUZ AVANTRA Ø100X10MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037605", "name": "MIL BURC Ø30X35", "address": "R5-K3 K4-S4", "raf": "R5", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "1 kutu boş /600 adet fasondan gelecek", "qty": "-", "desc": "KUMANDA DIREK CATALI"}, {"dept": "Talaşlı İmalat", "code": "21010363", "name": "MIL PIM X KOL YAY BAG. YIVLI Ø24X330,5MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010019", "name": "BORU Ø20XØ12,5X68MM", "address": "R2-K1 K2-S1", "raf": "R2", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010021", "name": "BORU X KOL ILK ACAR Ø51X27X257MM", "address": "R1-K3 K4-S3", "raf": "R1", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "YOK", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21011415", "name": "MIL YAY BAG. Ø16X32,5MM", "address": "R10-K3 K4-S3", "raf": "R10", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037595", "name": "MIL PIM Ø20X158MM", "address": "R9-K3 K4-S5", "raf": "R9", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038318", "name": "MIL ALFA BURC ALFA SASE Ø24X40MM", "address": "R4-K1 K2-S4", "raf": "R4", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038339", "name": "MIL BURC Ø35X48MM", "address": "R6-K3 K4-S1", "raf": "R6", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038634", "name": "BORU BURC X KOL ILK ACAR LIFT ARASI  Ø34X21X12MM", "address": "R1-K1 K2-S5", "raf": "R1", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036732", "name": "MIL BURC HALAT Ø40X35MM", "address": "R7-K1 K2-S2", "raf": "R7", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037728", "name": "eklenecek", "address": "R6-K1 K2-S2", "raf": "R6", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "1 kutu boş 600   fasondan gelicek", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039041", "name": "MIL BURC Ø35X10MM", "address": "R6-K1 K2-S4", "raf": "R6", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038390", "name": "MIL BURC Ø35X34,5MM", "address": "R6-K1 K2-S5", "raf": "R6", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038377", "name": "MIL BURC Ø35X70MM", "address": "R6-K3 K4-S3", "raf": "R6", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039472", "name": "MIL BURC X KOL KATLANIR Ø40X106MM", "address": "R6-K3 K4-S5", "raf": "R6", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038374", "name": "MIL BURC X KOL Ø30X72MM", "address": "R5-K3 K4-S5", "raf": "R5", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038375", "name": "MIL BURC X KOL ORTA Ø40XX33,5MM", "address": "R7-K1 K2-S3", "raf": "R7", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038385", "name": "MIL PIM ARA KOL Ø27,5X174MM", "address": "R9-K3 K4-S2", "raf": "R9", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037685", "name": "MIL PIM X KOL HAKAT BAG. Ø30X183MM", "address": "R10-K1 K2-S2", "raf": "R10", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "1 kutu boş /100 fasondan gelecek", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038381", "name": "MIL PIM X KOL ORTA M14X1,5MM Ø40X65MM", "address": "R10-K1 K2-S4", "raf": "R10", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21011227", "name": "MIL BASAMAK YAY Ø16X43MM", "address": "R10-K3 K4-S5", "raf": "R10", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21015506", "name": "PUL DELRIN Ø90X72X5,5MM", "address": "R11-K3 K4-S2", "raf": "R11", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038868", "name": "NIPEL CELIK G1/2\"E-G1/2\"E GALVANIZLI", "address": "R13-K1 K2-S5", "raf": "R13", "kat": "K1 K2", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036957", "name": "KORTAPA AKB CELIK E 3/8\"XAA19X9MM GALVANIZLI", "address": "R13-K3 K4-S4", "raf": "R13", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010768", "name": "KORTAPA AKB CELIK E 3/8\"XAA19X12MM(UZUN) GALVANIZLI", "address": "R13-K3 K4-S5", "raf": "R13", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21049467", "name": "-", "address": "R14-K1 K2-S2", "raf": "R14", "kat": "K1 K2", "sira": "S2", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010392", "name": "MIL MARPUC GALVANIZLI 24X42MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21019946", "name": "MIL MARPUC GEOMET 10X39MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21023357", "name": "SOMUN MARPUC 5/88", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010438", "name": "PISTON Ø58X42MM (C96-C71)", "address": "R15-K1,K2-S1,S2", "raf": "R15", "kat": "K1,K2", "sira": "S1,S2", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010439", "name": "PISTON Ø70X45MM (C145-C165)", "address": "R15-K1,K2-S1,S2,S3", "raf": "R15", "kat": "K1,K2", "sira": "S1,S2,S3", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21017290", "name": "PISTON Ø75X41,5MM (D125)", "address": "R15-K3,K4-S1,S2", "raf": "R15", "kat": "K3,K4", "sira": "S1,S2", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039427", "name": "MIL YAN KOL Ø23,8X165MM GALVANIZLI", "address": "R14-K3 K4-S5", "raf": "R14", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "DOLU", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039186", "name": "KORTAPA AKB CELIK E 3/8\"XAA19X29,5MM TD GALVANIZLI", "address": "R17-K3 K4-S5", "raf": "R17", "kat": "K3 K4", "sira": "S5", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038518", "name": "MIL PIM ASKI KOLU CAT2 Ø40X222MM", "address": "R14-K3 K4-S3", "raf": "R14", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21037645", "name": "MIL ORTA KOL BAG. SPRAYPRO Ø30X13MM", "address": "R14-K3 K4-S4", "raf": "R14", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21035208", "name": "MIL MARPUC 24LUK GALVANIZ Ø24X54MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21035205", "name": "MIL MARPUC 18LIK GEOMET Ø18X50MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028470", "name": "PUL POMPA C-165 Ø55XØ40X16MM", "address": "R17-K3 K4-S2", "raf": "R17", "kat": "K3 K4", "sira": "S2", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21028444", "name": "NIPEL CELIK G3/4\"E-G3/4\"E (C165)", "address": "R17-K3 K4-S4", "raf": "R17", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21013755", "name": "MIL CEKI OKU UC ASKI Ø40X217,5MM", "address": "R14-K3 K4-S1", "raf": "R14", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21011208", "name": "NIPEL CELIK G1/2\"E 38MM-G1/2\"E 13MM AA24X60MM", "address": "R7-K1 K2-S1", "raf": "R7", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010760", "name": "CIVATA OZEL MEMBRAN BASKI M12X21MM", "address": "R17-K1 K2-S1", "raf": "R17", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "iş emri verildi yapıldı", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21010100", "name": "GOVDE VALF AYAR 57X57X84MM", "address": "R17-K1 K2-S3", "raf": "R17", "kat": "K1 K2", "sira": "S3", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21027404", "name": "INSERT MIKSER G1\"", "address": "R16-K3 K4-S3", "raf": "R16", "kat": "K3 K4", "sira": "S3", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039939", "name": "eklenecek", "address": "R16-K3 K4-S1", "raf": "R16", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21038618", "name": "MIL BURC Ø30X20MM", "address": "-", "raf": "-", "kat": "-", "sira": "-", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "11190016", "name": "-", "address": "R8-K1 K2-S1", "raf": "R8", "kat": "K1 K2", "sira": "S1", "ambar": "-", "kutu": "-", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21036596", "name": "MIL PIM X KOL UC KIRMA SAPLAMA Ø20MM M16 X260MM", "address": "R13-K3 K4-S1", "raf": "R13", "kat": "K3 K4", "sira": "S1", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21039390", "name": "MIL PRO X KOL UC KIRMA Ø16X120MM", "address": "R14-K1 K2-S4", "raf": "R14", "kat": "K1 K2", "sira": "S4", "ambar": "-", "kutu": "1 kutu boş", "qty": "-", "desc": ""}, {"dept": "Talaşlı İmalat", "code": "21051860", "name": "INSERT 1/4\"X18MM", "address": "R16-K3 K4-S4", "raf": "R16", "kat": "K3 K4", "sira": "S4", "ambar": "-", "kutu": "BOŞ", "qty": "-", "desc": ""}];
+    const SECTIONS = [
+      { id: "montaj", name: "Montaj" },
+      { id: "kol", name: "Kol" },
+      { id: "talasli", name: "Talaşlı İmalat" },
+      { id: "yarimamul", name: "Yarımamul" },
+      { id: "pompa", name: "Pompa Kumanda" }
+    ];
 
     let store = [];
-    try {
-      const local = localStorage.getItem("kanban_inventory_db");
-      if (local && JSON.parse(local).length > 0) {
-        store = JSON.parse(local);
-      } else {
-        store = EMBEDDED_DATA;
-        localStorage.setItem("kanban_inventory_db", JSON.stringify(store));
-      }
-    } catch(e) {
-      store = EMBEDDED_DATA;
-    }
-
     let currentFilter = "Tümü";
 
+    try {
+      const cached = localStorage.getItem("kanban_inventory_live_v1");
+      if (cached && JSON.parse(cached).length > 0) {
+        store = JSON.parse(cached);
+      }
+    } catch(e){}
+
     window.addEventListener("DOMContentLoaded", () => {
-      buildUploadUI();
+      renderFilterPills();
       renderUI();
+      syncLiveGoogleSheets(false);
     });
+
+    async function syncLiveGoogleSheets(isManual) {
+      const statusText = document.getElementById("statusText");
+      const syncIcon = document.getElementById("syncIcon");
+      if (syncIcon) syncIcon.classList.add("fa-spin");
+
+      statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-blue-600"></i> Google E-Tablolar'dan güncel veriler alınıyor...`;
+
+      let allLiveItems = [];
+
+      try {
+        for (const cfg of SHEETS_CONFIG) {
+          const url = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}&t=${new Date().getTime()}`;
+          
+          try {
+            const resp = await fetch(url);
+            const text = await resp.text();
+            
+            const jsonStr = text.replace(/^[/*\sO_o]*google\.visualization\.Query\.setResponse\(/, "").replace(/\);?\s*$/, "");
+            const parsed = JSON.parse(jsonStr);
+
+            if (parsed && parsed.table) {
+              const rows = parsed.table.rows;
+              const cols = parsed.table.cols.map(c => (c.label || "").trim().toLowerCase());
+
+              rows.forEach(r => {
+                const c = r.c;
+                if (!c) return;
+
+                let rowObj = {};
+                cols.forEach((colName, idx) => {
+                  if (c[idx]) {
+                    const val = (c[idx].f !== undefined && c[idx].f !== null) ? c[idx].f : c[idx].v;
+                    rowObj[colName] = (val !== null && val !== undefined) ? String(val).trim() : "";
+                  }
+                });
+
+                const getVal = (idx) => (c[idx] ? ((c[idx].f !== undefined ? c[idx].f : c[idx].v) || "") : "").toString().trim();
+                
+                let code = rowObj["stok kodu"] || rowObj["kod"] || rowObj["malzeme kodu"] || getVal(1);
+                if (code.endsWith(".0")) code = code.slice(0, -2);
+
+                let name = rowObj["stok adı"] || rowObj["stok adi"] || rowObj["kod adı"] || rowObj["kod adi"] || getVal(2);
+                let qty = rowObj["kutu kapasitesi"] || rowObj["toplu işleme miktarı"] || rowObj["kanban miktarı"] || rowObj["miktar"] || getVal(3);
+                if (qty.endsWith(".0")) qty = qty.slice(0, -2);
+                if (!qty) qty = "-";
+
+                let addr = rowObj["adresi"] || rowObj["adres"] || rowObj["kanban adresi"] || rowObj["talaşlı i̇malat kanban"] || getVal(4);
+                let ambar = rowObj["ambar adres"] || rowObj["ambar adresi"] || rowObj["ambar"] || getVal(5) || "-";
+                let kutu = rowObj["kutu tipi"] || rowObj["kutu"] || rowObj["kutu durumu"] || getVal(6) || "Kutu";
+                let desc = rowObj["açıklama"] || rowObj["kullanıldığı yer"] || getVal(7) || "";
+
+                if (code && code.length >= 3 && code.toLowerCase() !== "stok kodu" && code.toLowerCase() !== "kod") {
+                  let dept = cfg.defaultDept;
+                  if (cfg.defaultDept === "Talaşlı İmalat") {
+                    const combined = `${name} ${desc} ${addr}`.toUpperCase();
+                    if (["POMPA", "KUMANDA", "VANA", "VALF", "FPR", "OSR", "PISTON", "MEMBRAN", "C-145", "C-165", "C-71", "C-96"].some(w => combined.includes(w))) {
+                      dept = "Pompa Kumanda";
+                    } else if (["YARIMAMUL", "KAYNAK", "ŞASE", "SASE", "LOTUS", "DELTA", "AVANTRA"].some(w => combined.includes(w))) {
+                      dept = "Yarımamul";
+                    } else if (["KOL", "X KOL", "YATAY EKO", "D PRO"].some(w => combined.includes(w))) {
+                      dept = "Kol";
+                    }
+                  }
+
+                  const parsedAddr = parseShelfAddress(addr);
+
+                  allLiveItems.push({
+                    dept,
+                    code,
+                    name: name || "-",
+                    address: addr || "-",
+                    raf: parsedAddr.raf,
+                    kat: parsedAddr.kat,
+                    sira: parsedAddr.sira,
+                    ambar: ambar || "-",
+                    kutu: kutu || "Kutu",
+                    qty: qty || "-",
+                    desc: desc || ""
+                  });
+                }
+              });
+            }
+          } catch(err) {
+            console.warn(`Tablo okunamadı (${cfg.sheet}):`, err);
+          }
+        }
+
+        if (allLiveItems.length > 0) {
+          store = allLiveItems;
+          localStorage.setItem("kanban_inventory_live_v1", JSON.stringify(store));
+          const nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+          statusText.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Google E-Tablolar doğrudan senkronize edildi (${store.length} parça).`;
+          document.getElementById("lastSyncTime").innerText = `Son Güncelleme: ${nowStr}`;
+        } else {
+          statusText.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Çevrimdışı önbellek gösteriliyor (${store.length} parça).`;
+        }
+
+      } catch (e) {
+        statusText.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-600"></i> Canlı bağlantı hatası. Önbellekteki veriler gösteriliyor.`;
+      } finally {
+        if (syncIcon) syncIcon.classList.remove("fa-spin");
+        renderFilterPills();
+        renderUI();
+      }
+    }
+
+    function parseShelfAddress(addrStr) {
+      if (!addrStr || addrStr === "-" || addrStr.trim() === "") {
+        return { raf: "-", kat: "-", sira: "-" };
+      }
+      let s = addrStr.trim();
+      let raf = "-", kat = "-", sira = "-";
+
+      const m_raf = s.match(/\bR\s*([0-9]+[A-Z]?)\b/i) || s.match(/R([0-9]+)/i);
+      if (m_raf) raf = "R" + m_raf[1].toUpperCase();
+
+      const m_kat = s.match(/\bK\s*([0-9]+(?:[\s,/K]+[0-9]+)*)/i);
+      if (m_kat) {
+        const kval = m_kat[1].split("-")[0].trim();
+        kat = "K" + kval.toUpperCase();
+      }
+
+      const m_sira = s.match(/\bS\s*([0-9]+(?:[\s,/-]+[0-9]+)*)/i);
+      if (m_sira) sira = "S" + m_sira[1].toUpperCase();
+
+      return { raf, kat, sira };
+    }
+
+    function renderFilterPills() {
+      const container = document.getElementById("filterPillsContainer");
+      const totalCount = store.length;
+      let html = `<button onclick="setFilter('Tümü')" class="filter-btn px-3 py-1.5 rounded-lg ${currentFilter === 'Tümü' ? 'bg-blue-600 text-white font-medium shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">Tümü (${totalCount})</button>`;
+
+      SECTIONS.forEach(sec => {
+        const cnt = store.filter(i => i.dept === sec.name).length;
+        const isActive = currentFilter === sec.name;
+        html += `<button onclick="setFilter('${sec.name}')" class="filter-btn px-3 py-1.5 rounded-lg ${isActive ? 'bg-blue-600 text-white font-medium shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">${sec.name} (${cnt})</button>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function setFilter(dept) {
+      currentFilter = dept;
+      renderFilterPills();
+      renderUI();
+    }
 
     function handleAdminToggle() {
       if (!isAdminOpen) {
-        const pass = prompt("Dosya yüklemek ve düzenlemek için şifreyi giriniz:");
+        const pass = prompt("Yönetici moduna geçmek için şifreyi giriniz:");
         if (pass === ADMIN_PASS) {
           isAdminOpen = true;
-          applyAdminState();
+          document.getElementById("adminUploadSection").classList.remove("hidden");
+          document.getElementById("adminLockIcon").className = "fa-solid fa-lock-open text-emerald-400";
         } else if (pass !== null) {
           alert("Hatalı şifre!");
         }
       } else {
         isAdminOpen = false;
-        applyAdminState();
+        document.getElementById("adminUploadSection").classList.add("hidden");
+        document.getElementById("adminLockIcon").className = "fa-solid fa-lock text-amber-400";
       }
-    }
-
-    function applyAdminState() {
-      const uploadSec = document.getElementById("adminUploadSection");
-      const addBtn = document.getElementById("addManualBtn");
-      const lockIcon = document.getElementById("adminLockIcon");
-      const btnText = document.getElementById("adminBtnText");
-      const thAction = document.getElementById("thAction");
-
-      if (isAdminOpen) {
-        uploadSec.classList.remove("hidden");
-        addBtn.classList.remove("hidden");
-        thAction.classList.remove("hidden");
-        lockIcon.innerText = "🔓";
-        btnText.innerText = "Yöneticiyi Kilitle";
-      } else {
-        uploadSec.classList.add("hidden");
-        addBtn.classList.add("hidden");
-        thAction.classList.add("hidden");
-        lockIcon.innerText = "🔒";
-        btnText.innerText = "Dosya Yükle / Düzenle";
-      }
-      renderUI();
-    }
-
-    function buildUploadUI() {
-      const grid = document.getElementById("deptUploadGrid");
-      grid.innerHTML = "";
-
-      SECTIONS.forEach(sec => {
-        const count = store.filter(i => i.dept === sec.name).length;
-        const col = document.createElement("div");
-        col.className = "upload-card";
-        col.innerHTML = `
-          <div class="upload-header">
-            <span>${sec.icon} ${sec.name}</span>
-            <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monospace; font-weight:bold;">${count}</span>
-          </div>
-          <label class="upload-btn">
-            📄 Dosya Seç
-            <input type="file" id="fileInput_${sec.id}" accept=".xlsx, .xls" class="hidden" onchange="processFile(event, '${sec.name}', 'fileInput_${sec.id}')">
-          </label>
-        `;
-        grid.appendChild(col);
-      });
-    }
-
-    function processFile(evt, deptName, inputId) {
-      if (typeof XLSX === 'undefined') {
-        alert("Excel kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.");
-        return;
-      }
-
-      const file = evt.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          let codeMap = {};
-
-          workbook.SheetNames.forEach(sheetName => {
-            const sheet = workbook.Sheets[sheetName];
-
-            const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-            if (matrix && matrix.length > 0) {
-              for (let r = 0; r < matrix.length; r++) {
-                const row = matrix[r];
-                for (let c = 0; c < row.length; c++) {
-                  const val = (row[c] || "").toString().trim();
-                  if (/^\d{6,10}$/.test(val)) {
-                    const code = val;
-                    let name = "";
-                    let addr = "";
-
-                    for (let offset = 1; offset <= 4; offset++) {
-                      const next = (row[c + offset] || "").toString().trim();
-                      if (/R\d+[- ]K/i.test(next)) {
-                        addr = next;
-                      } else if (!name && next.length > 2 && !/^\d+$/.test(next) && next !== "+" && next !== "-") {
-                        name = next;
-                      }
-                    }
-
-                    if (!codeMap[code]) {
-                      codeMap[code] = { dept: deptName, code: code, name: name, address: addr, ambar: "-", kutu: "-", qty: "-", desc: "" };
-                    } else {
-                      if (!codeMap[code].name && name) codeMap[code].name = name;
-                      if ((!codeMap[code].address || codeMap[code].address === "-") && addr) codeMap[code].address = addr;
-                    }
-                  }
-                }
-              }
-            }
-
-            const tableRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-            tableRows.forEach(row => {
-              let norm = {};
-              Object.keys(row).forEach(k => {
-                norm[k.toString().replace(/\s+/g, ' ').trim().toLowerCase()] = (row[k] !== undefined && row[k] !== null) ? row[k].toString().trim() : "";
-              });
-
-              let code = norm["kod"] || norm["malzeme kodu"] || norm["parça kodu"] || "";
-              let name = norm["kod adı"] || norm["kod adi"] || norm["malzeme adı"] || norm["parça adı"] || "";
-              
-              let rawAddr = "";
-              for (const k in norm) {
-                if (k.includes("kanban") || k.includes("adres") || k.includes("yerleşim") || k.includes("raf")) {
-                  if (/R\d+[- ]/i.test(norm[k])) {
-                    rawAddr = norm[k];
-                    break;
-                  }
-                }
-              }
-
-              let ambar = "";
-              for (const k in norm) {
-                if (k.includes("ambar") || k.includes("depo") || k.includes("stok yeri")) {
-                  ambar = norm[k];
-                  break;
-                }
-              }
-
-              let kutu = norm["kutu tipi"] || norm["kutu"] || norm["kutu durumu"] || "";
-              let qty = norm["toplu işleme miktarı"] || norm["kanban miktarı"] || norm["miktar"] || norm["kutu kapasitesi"] || "";
-              let desc = norm["kullanıldığı yer"] || norm["açıklama"] || "";
-
-              if (code && code.length >= 3 && code.toLowerCase() !== "kod") {
-                if (!codeMap[code]) {
-                  codeMap[code] = { dept: deptName, code: code, name: name, address: rawAddr, ambar: ambar, kutu: kutu, qty: qty, desc: desc };
-                } else {
-                  if (!codeMap[code].name && name) codeMap[code].name = name;
-                  if ((!codeMap[code].address || codeMap[code].address === "-") && rawAddr) codeMap[code].address = rawAddr;
-                  if ((!codeMap[code].ambar || codeMap[code].ambar === "-") && ambar) codeMap[code].ambar = ambar;
-                  if ((!codeMap[code].kutu || codeMap[code].kutu === "-") && kutu) codeMap[code].kutu = kutu;
-                  if ((!codeMap[code].qty || codeMap[code].qty === "-") && qty) codeMap[code].qty = qty;
-                  if (!codeMap[code].desc && desc) codeMap[code].desc = desc;
-                }
-              }
-            });
-          });
-
-          const finalItems = Object.values(codeMap).map(item => {
-            const parsed = parseShelfAddress(item.address);
-            return {
-              dept: item.dept,
-              code: item.code,
-              name: item.name || "-",
-              address: item.address || "-",
-              raf: parsed.raf,
-              kat: parsed.kat,
-              sira: parsed.sira,
-              ambar: item.ambar || "-",
-              kutu: item.kutu || "-",
-              qty: item.qty || "-",
-              desc: item.desc || ""
-            };
-          });
-
-          if (finalItems.length === 0) {
-            alert(`"${file.name}" dosyasında kayıt bulunamadı.`);
-            return;
-          }
-
-          store = store.filter(i => i.dept !== deptName).concat(finalItems);
-          saveStore();
-          buildUploadUI();
-          renderUI();
-          alert(`✅ ${deptName} verileri güncellendi! Toplam ${finalItems.length} parça yüklendi.`);
-
-        } catch (err) {
-          console.error(err);
-          alert("Dosya yüklenirken hata oluştu: " + err.message);
-        } finally {
-          const fileInput = document.getElementById(inputId);
-          if (fileInput) fileInput.value = "";
-        }
-      };
-
-      reader.readAsArrayBuffer(file);
-    }
-
-    function openModal() {
-      document.getElementById("addMaterialForm").reset();
-      document.getElementById("addModal").classList.remove("hidden");
-    }
-
-    function closeModal() {
-      document.getElementById("addModal").classList.add("hidden");
-    }
-
-    function syncFromFullAddress() {
-      const full = document.getElementById("mAddress").value.trim();
-      const parsed = parseShelfAddress(full);
-      if (parsed.raf !== "-") document.getElementById("mRaf").value = parsed.raf;
-      if (parsed.kat !== "-") document.getElementById("mKat").value = parsed.kat;
-      if (parsed.sira !== "-") document.getElementById("mSira").value = parsed.sira;
-    }
-
-    function handleManualAdd(e) {
-      e.preventDefault();
-      const dept = document.getElementById("mDept").value;
-      const code = document.getElementById("mCode").value.trim();
-      const name = document.getElementById("mName").value.trim();
-      const qty = document.getElementById("mQty").value.trim() || "-";
-      const ambar = document.getElementById("mAmbar").value.trim() || "-";
-      const kutu = document.getElementById("mKutu").value.trim() || "-";
-      const desc = document.getElementById("mDesc").value.trim() || "";
-
-      let raf = document.getElementById("mRaf").value.trim().toUpperCase() || "-";
-      let kat = document.getElementById("mKat").value.trim().toUpperCase() || "-";
-      let sira = document.getElementById("mSira").value.trim().toUpperCase() || "-";
-      let address = document.getElementById("mAddress").value.trim().toUpperCase();
-
-      if (!address && (raf !== "-" || kat !== "-" || sira !== "-")) {
-        address = `${raf}-${kat}-${sira}`.replace(/--/g, "-");
-      }
-      if (!address) address = "-";
-
-      const existingIdx = store.findIndex(i => i.code === code && i.dept === dept);
-      const newItem = { dept, code, name, address, raf, kat, sira, ambar, kutu, qty, desc };
-
-      if (existingIdx >= 0) {
-        store[existingIdx] = newItem;
-      } else {
-        store.unshift(newItem);
-      }
-
-      saveStore();
-      closeModal();
-      buildUploadUI();
-      renderUI();
-      alert(`✅ ${code} kodlu malzeme kaydedildi!`);
-    }
-
-    function deleteItem(code, dept) {
-      if (confirm(`${code} kodlu malzemeyi silmek istediğinize emin misiniz?`)) {
-        store = store.filter(i => !(i.code === code && i.dept === dept));
-        saveStore();
-        buildUploadUI();
-        renderUI();
-      }
-    }
-
-    function saveStore() {
-      localStorage.setItem("kanban_inventory_db", JSON.stringify(store));
-    }
-
-    function parseShelfAddress(addressStr) {
-      if (!addressStr || addressStr === "-" || addressStr.trim() === "") {
-        return { raf: "-", kat: "-", sira: "-" };
-      }
-
-      let raf = "-", kat = "-", sira = "-";
-      const parts = addressStr.split("-");
-
-      parts.forEach(part => {
-        const p = part.trim().toUpperCase();
-        if (p.startsWith("R")) {
-          raf = p;
-        } else if (p.includes("K") && !p.startsWith("S")) {
-          kat = p;
-        } else if (p.startsWith("S")) {
-          sira = p;
-        }
-      });
-
-      if (raf === "-" && /R\d+/i.test(addressStr)) {
-        const m = addressStr.match(/R\d+/i);
-        if (m) raf = m[0].toUpperCase();
-      }
-      if (kat === "-" && /K\d+/i.test(addressStr)) {
-        const m = addressStr.match(/K[0-9,\sK]+/i);
-        if (m) kat = m[0].trim().toUpperCase();
-      }
-      if (sira === "-" && /S\d+/i.test(addressStr)) {
-        const m = addressStr.match(/S\d+/i);
-        if (m) sira = m[0].toUpperCase();
-      }
-
-      return { raf, kat, sira };
-    }
-
-    function setFilter(dept) {
-      currentFilter = dept;
-      document.querySelectorAll(".filter-btn").forEach(btn => {
-        if (btn.innerText === dept) {
-          btn.className = "pill active filter-btn";
-        } else {
-          btn.className = "pill filter-btn";
-        }
-      });
-      renderUI();
     }
 
     function renderUI() {
@@ -615,38 +355,46 @@
           i.sira.toLowerCase().includes(search) ||
           i.ambar.toLowerCase().includes(search) ||
           i.kutu.toLowerCase().includes(search) ||
+          i.qty.toLowerCase().includes(search) ||
           (i.desc && i.desc.toLowerCase().includes(search))
         );
       }
 
-      document.getElementById("resultInfo").innerText = `${filtered.length} kayıt`;
+      document.getElementById("resultInfo").innerText = `${filtered.length} kayıt listeleniyor`;
 
       const tbody = document.getElementById("resultBody");
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${isAdminOpen ? 11 : 10}" style="text-align:center; padding:35px; color:#94a3b8; font-weight:500;">Eşleşen parça veya konum bulunamadı.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-10 text-slate-400 font-medium">Eşleşen parça veya konum bulunamadı.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = filtered.slice(0, 250).map(item => `
-        <tr>
-          <td><span class="badge">${item.dept}</span></td>
-          <td class="code">${item.code}</td>
-          <td>
-            <div style="font-weight:700; font-size:0.8rem; color:#0f172a;">${item.name}</div>
-            ${item.desc ? `<div style="font-size:0.7rem; color:#64748b; margin-top:2px;">🏷️ ${item.desc}</div>` : ''}
+      tbody.innerHTML = filtered.slice(0, 300).map(item => `
+        <tr class="hover:bg-blue-50/50 transition border-b border-slate-100">
+          <td class="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">
+            <span class="inline-block px-2 py-0.5 rounded text-[11px] bg-slate-100 border text-slate-600 font-medium">${item.dept}</span>
           </td>
-          <td style="text-align:center;"><span class="address">${item.address}</span></td>
-          <td class="c-raf">${item.raf}</td>
-          <td class="c-kat">${item.kat}</td>
-          <td class="c-sira">${item.sira}</td>
-          <td class="c-ambar">${item.ambar}</td>
-          <td style="text-align:center; font-size:0.75rem; color:#475569;">${item.kutu}</td>
-          <td class="c-qty">${item.qty}</td>
-          ${isAdminOpen ? `
-            <td style="text-align:center;">
-              <button onclick="deleteItem('${item.code}', '${item.dept}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.9rem;" title="Sil">🗑️</button>
-            </td>
-          ` : ''}
+          <td class="py-2.5 px-3 font-mono font-bold text-blue-700 text-xs whitespace-nowrap">${item.code}</td>
+          <td class="py-2.5 px-3 min-w-[200px]">
+            <div class="font-bold text-slate-800 text-xs">${item.name}</div>
+            ${item.desc ? `<div class="text-[10px] text-slate-400 font-medium mt-0.5"><i class="fa-solid fa-tag text-[9px] mr-1"></i>${item.desc}</div>` : ''}
+          </td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <span class="inline-block px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">${item.address}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-blue-800 bg-blue-50/40 text-xs whitespace-nowrap">${item.raf}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-indigo-800 bg-indigo-50/40 text-xs whitespace-nowrap">${item.kat}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-emerald-800 bg-emerald-50/40 text-xs whitespace-nowrap">${item.sira}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-semibold text-purple-800 bg-purple-50/40 text-xs whitespace-nowrap">${item.ambar}</td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <span class="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-amber-100/70 text-amber-900 border border-amber-200">
+              <i class="fa-solid fa-box text-[9px] mr-1 text-amber-600"></i>${item.kutu}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <span class="inline-block px-2.5 py-0.5 rounded text-xs font-mono font-extrabold bg-rose-50 text-rose-700 border border-rose-200">
+              ${item.qty}
+            </span>
+          </td>
         </tr>
       `).join("");
     }
