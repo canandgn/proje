@@ -4,18 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kanban Kart ve Adres Takip Paneli</title>
-  <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- SheetJS (Excel Okuyucu) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06); }
-  </style>
+  <style>.card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06); }</style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen">
-
-  <!-- Üst Başlık / Header -->
   <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
@@ -24,45 +18,29 @@
         </h1>
         <p class="text-xs text-slate-400">Montaj | Kol | Talaşlı İmalat | Yarımamul | Pompa Kumanda</p>
       </div>
-
       <div class="flex items-center gap-2.5">
-        <!-- Şifreli Yönetici Giriş Butonu -->
-        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2">
           <i id="adminLockIcon" class="fa-solid fa-lock text-amber-400"></i>
           <span id="adminBtnText">Dosya Yükle / Düzenle</span>
         </button>
-
-        <!-- Yönetici Modunda Gözüken Manuel Ekle Butonu -->
-        <button id="addManualBtn" onclick="openModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition">
+        <button id="addManualBtn" onclick="openModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
           <i class="fa-solid fa-plus"></i> Yeni Malzeme Ekle
         </button>
-
         <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg">
-          Toplam Malzeme: <strong id="totalCount" class="text-blue-400 font-mono text-sm">0</strong>
+          Toplam: <strong id="totalCount" class="text-blue-400 font-mono">0</strong>
         </span>
       </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-5">
-
-    <!-- BÖLÜM 1: ARAMA MOTORU (EN ÜSTTE) -->
     <section class="bg-white rounded-xl p-5 card-shadow border border-slate-200 space-y-3">
       <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
           <i class="fa-solid fa-magnifying-glass text-lg"></i>
         </div>
-        <input 
-          type="text" 
-          id="searchInput" 
-          autofocus
-          oninput="renderUI()" 
-          placeholder="Malzeme kodu girin (örn: 21036106) veya ad, raf, kat, sıra, ambar adresi arayın..." 
-          class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base font-semibold transition"
-        >
+        <input type="text" id="searchInput" autofocus oninput="renderUI()" placeholder="Malzeme kodu veya ad, raf, kat, sıra, ambar adresi arayın..." class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
       </div>
-
-      <!-- Kategori Filtre Butonları -->
       <div class="flex flex-wrap gap-2 text-xs font-medium">
         <button onclick="setFilter('Tümü')" class="filter-btn px-3 py-1.5 rounded-lg bg-blue-600 text-white">Tümü</button>
         <button onclick="setFilter('Talaşlı İmalat')" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Talaşlı İmalat</button>
@@ -73,73 +51,57 @@
       </div>
     </section>
 
-    <!-- BÖLÜM 2: ŞİFRELİ DOSYA YÜKLEME ALANI (Varsayılan Olarak Gizli) -->
     <section id="adminUploadSection" class="hidden bg-white rounded-xl p-5 card-shadow border-2 border-dashed border-blue-200 space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
-          <i class="fa-solid fa-folder-open text-blue-600"></i> Bölüm Listesi Seç / Güncelle (.xlsx)
+        <h2 class="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
+          <i class="fa-solid fa-folder-open text-blue-600"></i> Bölüm Listesi Seç / Güncelle
         </h2>
-        <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1">
-          <i class="fa-solid fa-lock-open text-[10px]"></i> Yönetici Paneli Açık
-        </span>
+        <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-semibold">✓ Yönetici Aktif</span>
       </div>
-      <p class="text-xs text-slate-500">Yeni dosya yüklediğinizde, seçilen bölümün önceki verileri silinip yeni dosyadaki güncel veriler kaydedilir.</p>
-
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="deptUploadGrid"></div>
     </section>
 
-    <!-- BÖLÜM 3: ARAMA SONUÇLARI TABLOSU -->
     <section class="bg-white rounded-xl card-shadow border border-slate-200 overflow-hidden">
       <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Bulunan Konumlar</span>
-        <span id="resultInfo" class="text-xs text-slate-500 font-mono">0 kayıt listeleniyor</span>
+        <span class="text-xs font-bold uppercase text-slate-600">Bulunan Konumlar</span>
+        <span id="resultInfo" class="text-xs text-slate-500 font-mono">0 kayıt</span>
       </div>
-
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm border-collapse">
           <thead>
             <tr class="bg-slate-100 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
               <th class="py-3 px-3">Bölüm</th>
-              <th class="py-3 px-3">Malzeme Kodu</th>
-              <th class="py-3 px-3">Malzeme Adı</th>
-              <th class="py-3 px-3 text-center">Kanban Adresi</th>
-              <th class="py-3 px-3 text-center text-blue-700">Raf</th>
-              <th class="py-3 px-3 text-center text-indigo-700">Kat</th>
-              <th class="py-3 px-3 text-center text-emerald-700">Sıra</th>
-              <th class="py-3 px-3 text-center text-purple-700">Ambar Adresi</th>
-              <th class="py-3 px-3 text-center">Kutu Tipi</th>
+              <th class="py-3 px-3">Kodu</th>
+              <th class="py-3 px-3">Adı</th>
+              <th class="py-3 px-3 text-center">Kanban</th>
+              <th class="py-3 px-3 text-center">Raf</th>
+              <th class="py-3 px-3 text-center">Kat</th>
+              <th class="py-3 px-3 text-center">Sıra</th>
+              <th class="py-3 px-3 text-center">Ambar</th>
+              <th class="py-3 px-3 text-center">Kutu</th>
               <th class="py-3 px-3 text-center">Miktar</th>
               <th id="thAction" class="py-3 px-3 text-center hidden">İşlem</th>
             </tr>
           </thead>
           <tbody id="resultBody" class="divide-y divide-slate-100 text-slate-700 text-xs">
-            <tr>
-              <td colspan="11" class="text-center py-10 text-slate-400">
-                Arama yapmak için yukarıya malzeme kodu veya adını yazın.
-              </td>
-            </tr>
+            <tr><td colspan="11" class="text-center py-10 text-slate-400">Arama yapmak için yukarıya yazın</td></tr>
           </tbody>
         </table>
       </div>
     </section>
-
   </main>
 
-  <!-- MODAL: Yeni Malzeme Ekle -->
   <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b pb-3">
-        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-square-plus text-emerald-600"></i> Yeni Malzeme Ekle
         </h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
       <form id="addMaterialForm" onsubmit="handleManualAdd(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Bölüm Seçin *</label>
+          <label class="block font-semibold text-slate-700 mb-1">Bölüm *</label>
           <select id="mDept" required class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
             <option value="Talaşlı İmalat">Talaşlı İmalat</option>
             <option value="Montaj">Montaj</option>
@@ -148,62 +110,55 @@
             <option value="Pompa Kumanda">Pompa Kumanda</option>
           </select>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Malzeme Kodu *</label>
-            <input type="text" id="mCode" required placeholder="örn: 21036106" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-mono font-bold">
+            <label class="block font-semibold text-slate-700 mb-1">Kodu *</label>
+            <input type="text" id="mCode" required placeholder="21036106" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-mono uppercase">
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Miktar</label>
-            <input type="text" id="mQty" placeholder="örn: 75" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-mono">
+            <input type="text" id="mQty" placeholder="75" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
-
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Malzeme Adı *</label>
-          <input type="text" id="mName" required placeholder="örn: BORU X KOL..." class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 uppercase">
+          <label class="block font-semibold text-slate-700 mb-1">Adı *</label>
+          <input type="text" id="mName" required placeholder="BORU X KOL" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 uppercase">
         </div>
-
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Tam Kanban Adresi</label>
-          <input type="text" id="mAddress" oninput="syncFromFullAddress()" placeholder="örn: R1-K1 K2-S1" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-mono uppercase">
+          <label class="block font-semibold text-slate-700 mb-1">Kanban Adresi</label>
+          <input type="text" id="mAddress" oninput="syncFromFullAddress()" placeholder="R1-K1-S1" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 uppercase">
         </div>
-
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Raf</label>
-            <input type="text" id="mRaf" placeholder="R1" class="w-full border border-slate-300 rounded-lg p-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-center font-bold font-mono">
+            <input type="text" id="mRaf" placeholder="R1" class="w-full border border-slate-300 rounded-lg p-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-center font-bold uppercase">
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Kat</label>
-            <input type="text" id="mKat" placeholder="K1 K2" class="w-full border border-slate-300 rounded-lg p-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-center font-bold font-mono">
+            <input type="text" id="mKat" placeholder="K1" class="w-full border border-slate-300 rounded-lg p-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-center font-bold uppercase">
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Sıra</label>
-            <input type="text" id="mSira" placeholder="S1" class="w-full border border-slate-300 rounded-lg p-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-center font-bold font-mono">
+            <input type="text" id="mSira" placeholder="S1" class="w-full border border-slate-300 rounded-lg p-1.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-center font-bold uppercase">
           </div>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Ambar Adresi</label>
-            <input type="text" id="mAmbar" placeholder="örn: A-12 veya 01-B" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 uppercase font-mono">
+            <label class="block font-semibold text-slate-700 mb-1">Ambar</label>
+            <input type="text" id="mAmbar" placeholder="A-12" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 uppercase">
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Kutu Tipi</label>
-            <input type="text" id="mKutu" placeholder="örn: Plastik, Metal..." class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="mKutu" placeholder="Plastik" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
-
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Açıklama / Kullanıldığı Yer</label>
-          <input type="text" id="mDesc" placeholder="örn: POMPA, MONTAJ..." class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
+          <label class="block font-semibold text-slate-700 mb-1">Açıklama</label>
+          <input type="text" id="mDesc" placeholder="POMPA, MONTAJ" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 uppercase">
         </div>
-
         <div class="flex items-center justify-end gap-2 pt-3 border-t">
-          <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium">İptal</button>
-          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow">Kaydet</button>
+          <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">İptal</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold">Kaydet</button>
         </div>
       </form>
     </div>
@@ -211,6 +166,7 @@
 
   <script>
     const ADMIN_PASS = "1453";
+    const STORAGE_KEY = "kanban_inventory_db";
     let isAdminOpen = false;
 
     const SECTIONS = [
@@ -221,7 +177,32 @@
       { id: "pompa", name: "Pompa Kumanda", icon: "fa-gauge-high" }
     ];
 
-    let store = JSON.parse(localStorage.getItem("kanban_inventory_db") || "[]");
+    function escape_html(val) {
+      return String(val || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+    }
+
+    function readStore() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) {
+        console.warn("localStorage read error:", e);
+        return [];
+      }
+    }
+
+    function writeStore(items) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        return true;
+      } catch(e) {
+        console.error("localStorage write error:", e);
+        alert("Depolama alanı dolu veya erişim yok!");
+        return false;
+      }
+    }
+
+    let store = readStore();
     let currentFilter = "Tümü";
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -231,12 +212,12 @@
 
     function handleAdminToggle() {
       if (!isAdminOpen) {
-        const pass = prompt("Dosya yüklemek ve düzenlemek için şifreyi giriniz:");
+        const pass = prompt("Şifreyi girin:");
         if (pass === ADMIN_PASS) {
           isAdminOpen = true;
           applyAdminState();
         } else if (pass !== null) {
-          alert("Hatalı şifre!");
+          alert("❌ Hatalı şifre!");
         }
       } else {
         isAdminOpen = false;
@@ -269,6 +250,7 @@
 
     function buildUploadUI() {
       const grid = document.getElementById("deptUploadGrid");
+      if (!grid) return;
       grid.innerHTML = "";
 
       SECTIONS.forEach(sec => {
@@ -280,53 +262,48 @@
             <span class="text-xs font-bold text-slate-800 truncate"><i class="fa-solid ${sec.icon} text-blue-500 mr-1.5"></i>${sec.name}</span>
             <span class="text-[10px] bg-white border border-slate-300 px-1.5 py-0.5 rounded font-mono font-bold text-slate-600">${count}</span>
           </div>
-          <label class="w-full flex items-center justify-center gap-1.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-700 font-medium cursor-pointer hover:border-blue-500 hover:text-blue-600 shadow-sm transition">
+          <label class="w-full flex items-center justify-center gap-1.5 py-1.5 bg-white border border-slate-300 rounded text-xs text-slate-700 font-medium cursor-pointer hover:border-blue-500 hover:text-blue-600">
             <i class="fa-solid fa-file-excel text-emerald-600"></i> Dosya Seç
-            <input type="file" id="fileInput_${sec.id}" accept=".xlsx, .xls" class="hidden" onchange="processFile(event, '${sec.name}', 'fileInput_${sec.id}')">
+            <input type="file" accept=".xlsx,.xls" class="hidden" onchange="processFile(event, '${sec.name}')">
           </label>
         `;
         grid.appendChild(col);
       });
     }
 
-    // Gelişmiş Bütünleşik Excel Okuma Motoru
-    function processFile(evt, deptName, inputId) {
-      const file = evt.target.files[0];
+    function processFile(evt, deptName) {
+      const file = evt.target.files?.[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
-          const data = new Uint8Array(e.target.result);
+          const data = new Uint8Array(e.target.result || []);
           const workbook = XLSX.read(data, { type: "array" });
-          let codeMap = {};
+          const codeMap = {};
 
           workbook.SheetNames.forEach(sheetName => {
             const sheet = workbook.Sheets[sheetName];
-
-            // 1. Matris Taraması (YENİ YERLEŞİM gibi yan yana raflar)
             const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
-            if (matrix && matrix.length > 0) {
+
+            if (matrix?.length > 0) {
               for (let r = 0; r < matrix.length; r++) {
-                const row = matrix[r];
+                const row = matrix[r] || [];
                 for (let c = 0; c < row.length; c++) {
-                  const val = (row[c] || "").toString().trim();
+                  const val = String(row[c] || "").trim();
                   if (/^\d{6,10}$/.test(val)) {
                     const code = val;
                     let name = "";
                     let addr = "";
 
-                    for (let offset = 1; offset <= 4; offset++) {
-                      const next = (row[c + offset] || "").toString().trim();
-                      if (/R\d+[- ]K/i.test(next)) {
-                        addr = next;
-                      } else if (!name && next.length > 2 && !/^\d+$/.test(next) && next !== "+" && next !== "-") {
-                        name = next;
-                      }
+                    for (let o = 1; o <= 4; o++) {
+                      const next = String(row[c + o] || "").trim();
+                      if (/R\d+[- ]K/i.test(next)) addr = next;
+                      else if (!name && next.length > 2 && !/^\d+$/.test(next) && !["+","-"].includes(next)) name = next;
                     }
 
                     if (!codeMap[code]) {
-                      codeMap[code] = { dept: deptName, code: code, name: name, address: addr, ambar: "-", kutu: "-", qty: "-", desc: "" };
+                      codeMap[code] = { dept: deptName, code, name, address: addr, ambar: "-", kutu: "-", qty: "-", desc: "" };
                     } else {
                       if (!codeMap[code].name && name) codeMap[code].name = name;
                       if ((!codeMap[code].address || codeMap[code].address === "-") && addr) codeMap[code].address = addr;
@@ -336,44 +313,22 @@
               }
             }
 
-            // 2. Standart Tablo Taraması (Güncel Liste, İŞLENENLER, Liste vb.)
             const tableRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
             tableRows.forEach(row => {
-              let norm = {};
-              Object.keys(row).forEach(k => {
-                norm[k.toString().replace(/\s+/g, ' ').trim().toLowerCase()] = (row[k] !== undefined && row[k] !== null) ? row[k].toString().trim() : "";
+              const norm = {};
+              Object.keys(row || {}).forEach(k => {
+                norm[String(k).replace(/\s+/g," ").trim().toLowerCase()] = String(row[k] ?? "").trim();
               });
 
-              // Kod
-              let code = "";
-              for (const k in norm) {
-                if (k === "kod" || k === "malzeme kodu" || k === "parça kodu") {
-                  code = norm[k];
-                  break;
-                }
-              }
-
-              // Kod Adı
-              let name = "";
-              for (const k in norm) {
-                if (k === "kod adı" || k === "kod adi" || k === "malzeme adı" || k === "parça adı") {
-                  name = norm[k];
-                  break;
-                }
-              }
-
-              // Kanban Adresi
+              let code = norm.kod || norm["malzeme kodu"] || norm["parça kodu"] || "";
+              let name = norm["kod adı"] || norm["kod adi"] || norm["malzeme adı"] || norm["parça adı"] || "";
               let rawAddr = "";
               for (const k in norm) {
-                if (k.includes("kanban") || k.includes("adres") || k.includes("yerleşim") || k.includes("raf")) {
-                  if (/R\d+[- ]/i.test(norm[k])) {
-                    rawAddr = norm[k];
-                    break;
-                  }
+                if ((k.includes("kanban") || k.includes("adres") || k.includes("yerleşim") || k.includes("raf")) && /R\d+[- ]/i.test(norm[k])) {
+                  rawAddr = norm[k];
+                  break;
                 }
               }
-
-              // Ambar Adresi
               let ambar = "";
               for (const k in norm) {
                 if (k.includes("ambar") || k.includes("depo") || k.includes("stok yeri")) {
@@ -381,19 +336,13 @@
                   break;
                 }
               }
-
-              // Kutu Tipi
-              let kutu = norm["kutu tipi"] || norm["kutu"] || norm["ambalaj"] || "";
-
-              // Miktar
-              let qty = norm["toplu işleme miktarı"] || norm["kanban miktarı"] || norm["miktar"] || norm["kutu kapasitesi"] || "";
-
-              // Açıklama
-              let desc = norm["kullanıldığı yer"] || norm["kullanildigi yer"] || norm["açıklama"] || norm["aciklama"] || "";
+              const kutu = norm["kutu tipi"] || norm.kutu || norm.ambalaj || "";
+              const qty = norm["toplu işleme miktarı"] || norm["kanban miktarı"] || norm.miktar || norm["kutu kapasitesi"] || "";
+              const desc = norm["kullanıldığı yer"] || norm["kullanildigi yer"] || norm.açıklama || norm.aciklama || "";
 
               if (code && code.length >= 3 && code.toLowerCase() !== "kod") {
                 if (!codeMap[code]) {
-                  codeMap[code] = { dept: deptName, code: code, name: name, address: rawAddr, ambar: ambar, kutu: kutu, qty: qty, desc: desc };
+                  codeMap[code] = { dept: deptName, code, name, address: rawAddr, ambar, kutu, qty, desc };
                 } else {
                   if (!codeMap[code].name && name) codeMap[code].name = name;
                   if ((!codeMap[code].address || codeMap[code].address === "-") && rawAddr) codeMap[code].address = rawAddr;
@@ -428,34 +377,26 @@
             return;
           }
 
-          // Seçilen bölümün önceki verilerini silip yeni dosyadaki güncel verileri yükle
           store = store.filter(i => i.dept !== deptName).concat(finalItems);
-          saveStore();
+          if (!writeStore(store)) return;
           buildUploadUI();
           renderUI();
-          alert(`✅ ${deptName} verileri güncellendi! Yeni dosyadan toplam ${finalItems.length} parça yüklendi.`);
-
-        } catch (err) {
+          alert(`✅ ${deptName} güncellendi! ${finalItems.length} parça yüklendi.`);
+        } catch(err) {
           console.error(err);
-          alert("Dosya yüklenirken hata oluştu: " + err.message);
-        } finally {
-          // Input'u sıfırla ki aynı dosya tekrar seçildiğinde de tetiklensin
-          const fileInput = document.getElementById(inputId);
-          if (fileInput) fileInput.value = "";
+          alert("Hata: " + err.message);
         }
       };
-
       reader.readAsArrayBuffer(file);
     }
 
-    // Modal
     function openModal() {
-      document.getElementById("addMaterialForm").reset();
-      document.getElementById("addModal").classList.remove("hidden");
+      document.getElementById("addMaterialForm")?.reset?.();
+      document.getElementById("addModal")?.classList.remove("hidden");
     }
 
     function closeModal() {
-      document.getElementById("addModal").classList.add("hidden");
+      document.getElementById("addModal")?.classList.add("hidden");
     }
 
     function syncFromFullAddress() {
@@ -495,29 +436,24 @@
         store.unshift(newItem);
       }
 
-      saveStore();
+      if (!writeStore(store)) return;
       closeModal();
       buildUploadUI();
       renderUI();
-      alert(`✅ ${code} kodlu malzeme kaydedildi!`);
+      alert(`✅ ${code} kaydedildi!`);
     }
 
     function deleteItem(code, dept) {
-      if (confirm(`${code} kodlu malzemeyi silmek istediğinize emin misiniz?`)) {
+      if (confirm(`${code} silinsin mi?`)) {
         store = store.filter(i => !(i.code === code && i.dept === dept));
-        saveStore();
+        if (!writeStore(store)) return;
         buildUploadUI();
         renderUI();
       }
     }
 
-    function saveStore() {
-      localStorage.setItem("kanban_inventory_db", JSON.stringify(store));
-    }
-
-    // Güçlendirilmiş Adres Ayrıştırıcı
     function parseShelfAddress(addressStr) {
-      if (!addressStr || addressStr === "-" || addressStr.trim() === "") {
+      if (!addressStr || addressStr === "-" || !addressStr.trim()) {
         return { raf: "-", kat: "-", sira: "-" };
       }
 
@@ -526,24 +462,20 @@
 
       parts.forEach(part => {
         const p = part.trim().toUpperCase();
-        if (p.startsWith("R")) {
-          raf = p;
-        } else if (p.includes("K") && !p.startsWith("S")) {
-          kat = p;
-        } else if (p.startsWith("S")) {
-          sira = p;
-        }
+        if (p.startsWith("R")) raf = p;
+        else if (p.includes("K") && !p.startsWith("S")) kat = p;
+        else if (p.startsWith("S")) sira = p;
       });
 
-      if (raf === "-" && /R\d+/i.test(addressStr)) {
+      if (raf === "-") {
         const m = addressStr.match(/R\d+/i);
         if (m) raf = m[0].toUpperCase();
       }
-      if (kat === "-" && /K\d+/i.test(addressStr)) {
+      if (kat === "-") {
         const m = addressStr.match(/K[0-9,\sK]+/i);
         if (m) kat = m[0].trim().toUpperCase();
       }
-      if (sira === "-" && /S\d+/i.test(addressStr)) {
+      if (sira === "-") {
         const m = addressStr.match(/S\d+/i);
         if (m) sira = m[0].toUpperCase();
       }
@@ -565,7 +497,7 @@
 
     function renderUI() {
       const search = (document.getElementById("searchInput").value || "").toLowerCase().trim();
-      document.getElementById("totalCount").innerText = store.length;
+      document.getElementById("totalCount").innerText = String(store.length);
 
       let filtered = store;
       if (currentFilter !== "Tümü") {
@@ -574,52 +506,39 @@
 
       if (search) {
         filtered = filtered.filter(i => 
-          i.code.toLowerCase().includes(search) ||
-          i.name.toLowerCase().includes(search) ||
-          i.address.toLowerCase().includes(search) ||
-          i.raf.toLowerCase().includes(search) ||
-          i.kat.toLowerCase().includes(search) ||
-          i.sira.toLowerCase().includes(search) ||
-          i.ambar.toLowerCase().includes(search) ||
-          i.kutu.toLowerCase().includes(search) ||
-          (i.desc && i.desc.toLowerCase().includes(search))
+          (i.code || "").toLowerCase().includes(search) ||
+          (i.name || "").toLowerCase().includes(search) ||
+          (i.address || "").toLowerCase().includes(search) ||
+          (i.raf || "").toLowerCase().includes(search) ||
+          (i.kat || "").toLowerCase().includes(search) ||
+          (i.sira || "").toLowerCase().includes(search) ||
+          (i.ambar || "").toLowerCase().includes(search) ||
+          (i.kutu || "").toLowerCase().includes(search) ||
+          (i.desc || "").toLowerCase().includes(search)
         );
       }
 
-      document.getElementById("resultInfo").innerText = `${filtered.length} kayıt listeleniyor`;
+      document.getElementById("resultInfo").innerText = `${filtered.length} kayıt`;
 
       const tbody = document.getElementById("resultBody");
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${isAdminOpen ? 11 : 10}" class="text-center py-10 text-slate-400">Eşleşen kayıt bulunamadı.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${isAdminOpen ? 11 : 10}" class="text-center py-10 text-slate-400">Kayıt bulunamadı</td></tr>`;
         return;
       }
 
       tbody.innerHTML = filtered.slice(0, 200).map(item => `
         <tr class="hover:bg-blue-50/50 transition border-b border-slate-100">
-          <td class="py-2.5 px-3 font-semibold text-slate-700">
-            <span class="inline-block px-2 py-0.5 rounded text-[11px] bg-slate-100 border text-slate-600">${item.dept}</span>
-          </td>
-          <td class="py-2.5 px-3 font-mono font-bold text-blue-700">${item.code}</td>
-          <td class="py-2.5 px-3">
-            <div class="font-medium text-slate-800 text-xs">${item.name}</div>
-            ${item.desc ? `<div class="text-[10px] text-slate-400 font-medium mt-0.5"><i class="fa-solid fa-tag text-[9px] mr-1"></i>${item.desc}</div>` : ''}
-          </td>
-          <td class="py-2.5 px-3 text-center">
-            <span class="inline-block px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">${item.address}</span>
-          </td>
-          <td class="py-2.5 px-3 text-center font-bold text-blue-800 bg-blue-50/40">${item.raf}</td>
-          <td class="py-2.5 px-3 text-center font-bold text-indigo-800 bg-indigo-50/40">${item.kat}</td>
-          <td class="py-2.5 px-3 text-center font-bold text-emerald-800 bg-emerald-50/40">${item.sira}</td>
-          <td class="py-2.5 px-3 text-center font-mono font-semibold text-purple-800 bg-purple-50/40">${item.ambar}</td>
-          <td class="py-2.5 px-3 text-center text-xs text-slate-600">${item.kutu}</td>
-          <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700">${item.qty}</td>
-          ${isAdminOpen ? `
-            <td class="py-2.5 px-3 text-center">
-              <button onclick="deleteItem('${item.code}', '${item.dept}')" class="text-slate-400 hover:text-rose-600 transition p-1" title="Sil">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </td>
-          ` : ''}
+          <td class="py-2.5 px-3"><span class="inline-block px-2 py-0.5 rounded text-[11px] bg-slate-100 border text-slate-600">${escape_html(item.dept)}</span></td>
+          <td class="py-2.5 px-3 font-mono font-bold text-blue-700">${escape_html(item.code)}</td>
+          <td class="py-2.5 px-3"><div class="font-medium text-slate-800 text-xs">${escape_html(item.name)}</div>${item.desc ? `<div class="text-[10px] text-slate-400 mt-0.5">📌 ${escape_html(item.desc)}</div>` : ""}</td>
+          <td class="py-2.5 px-3 text-center"><span class="inline-block px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">${escape_html(item.address)}</span></td>
+          <td class="py-2.5 px-3 text-center font-bold text-blue-800 bg-blue-50/40">${escape_html(item.raf)}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-indigo-800 bg-indigo-50/40">${escape_html(item.kat)}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-emerald-800 bg-emerald-50/40">${escape_html(item.sira)}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-semibold text-purple-800 bg-purple-50/40">${escape_html(item.ambar)}</td>
+          <td class="py-2.5 px-3 text-center text-xs text-slate-600">${escape_html(item.kutu)}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700">${escape_html(item.qty)}</td>
+          ${isAdminOpen ? `<td class="py-2.5 px-3 text-center"><button onclick="deleteItem('${item.code.replace(/'/g,"\\'")}','${item.dept.replace(/'/g,"\\'")}'" class="text-slate-400 hover:text-rose-600 transition p-1"><i class="fa-solid fa-trash-can"></i></button></td>` : ""}
         </tr>
       `).join("");
     }
