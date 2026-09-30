@@ -30,8 +30,18 @@
           <span class="hidden sm:inline">Listeyi Yenile</span>
         </button>
 
+        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+          <i id="adminLockIcon" class="fa-solid fa-lock text-amber-400"></i>
+          <span id="adminBtnText" class="hidden sm:inline">Yönetici Girişi</span>
+        </button>
+
+        <button id="addMaterialBtn" onclick="openAddModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition active:scale-95">
+          <i class="fa-solid fa-plus"></i>
+          <span>Yeni Malzeme Ekle</span>
+        </button>
+
         <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg font-mono">
-          Toplam Parça: <strong id="totalCount" class="text-blue-400 text-sm">0</strong>
+          Toplam: <strong id="totalCount" class="text-blue-400 text-sm">0</strong>
         </span>
       </div>
     </div>
@@ -42,10 +52,55 @@
     <!-- Bilgi Çubuğu -->
     <div id="statusAlert" class="text-xs bg-blue-50 border border-blue-200 text-blue-800 px-3.5 py-2 rounded-xl flex items-center justify-between shadow-sm">
       <span id="statusText" class="flex items-center gap-2 font-medium">
-        <i class="fa-solid fa-circle-check text-emerald-600"></i> Montaj, Kol ve Talaşlı İmalat hazır yüklendi.
+        <i class="fa-solid fa-circle-check text-emerald-600"></i> Veriler senkronize edildi.
       </span>
       <span id="lastSyncTime" class="text-[11px] text-slate-400 font-mono"></span>
     </div>
+
+    <!-- YÖNETİCİ KONTROL PANELİ VE E-TABLO BAĞLANTILARI -->
+    <section id="adminUploadSection" class="hidden bg-white rounded-xl p-4 md:p-5 card-shadow border-2 border-dashed border-blue-300 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div>
+          <h2 class="text-xs md:text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-blue-600"></i> YÖNETİCİ KONTROL PANELİ
+          </h2>
+          <p class="text-[11px] text-slate-500 mt-0.5">Aşağıdaki butonlara tıklayarak tablonuzu Google E-Tablolar üzerinden doğrudan düzenleyebilirsiniz. Buradan eklediğiniz/sildiğiniz malzemeler tüm ustalara anında yansır[cite: 5].</p>
+        </div>
+        <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded font-bold">Yönetici Modu Aktif</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <a href="https://docs.google.com/spreadsheets/d/11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc/edit" target="_blank" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 flex items-center justify-between transition group shadow-sm">
+          <div>
+            <div class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-table-cells text-blue-600 text-sm"></i> MONTAJ E-Tablosu[cite: 5]
+            </div>
+            <div class="text-[10px] text-blue-600 mt-0.5">Düzenlemek için tıkla &rarr;</div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-blue-400 group-hover:text-blue-600"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg/edit" target="_blank" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 flex items-center justify-between transition group shadow-sm">
+          <div>
+            <div class="text-xs font-bold text-purple-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-table-cells text-purple-600 text-sm"></i> KOL E-Tablosu[cite: 5]
+            </div>
+            <div class="text-[10px] text-purple-600 mt-0.5">Düzenlemek için tıkla &rarr;</div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-purple-400 group-hover:text-purple-600"></i>
+        </a>
+
+        <a href="https://docs.google.com/spreadsheets/d/1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME/edit" target="_blank" class="p-3 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 flex items-center justify-between transition group shadow-sm">
+          <div>
+            <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-table-cells text-amber-600 text-sm"></i> TALAŞLI İMALAT E-Tablosu[cite: 5]
+            </div>
+            <div class="text-[10px] text-amber-600 mt-0.5">Düzenlemek için tıkla &rarr;</div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-amber-400 group-hover:text-amber-600"></i>
+        </a>
+      </div>
+    </section>
 
     <!-- ARAMA MOTORU VE BÖLÜM BUTONLARI -->
     <section class="bg-white rounded-xl p-4 md:p-5 card-shadow border border-slate-200 space-y-3">
@@ -90,11 +145,12 @@
               <th class="py-3 px-3 text-center text-purple-700">Ambar</th>
               <th class="py-3 px-3 text-center text-amber-700 font-extrabold">Kutu Tipi</th>
               <th class="py-3 px-3 text-center text-rose-700 font-extrabold">Kapasite / Miktar</th>
+              <th id="thAction" class="py-3 px-3 text-center hidden text-rose-600 font-bold">İşlem</th>
             </tr>
           </thead>
           <tbody id="resultBody" class="divide-y divide-slate-100 text-slate-700">
             <tr>
-              <td colspan="10" class="text-center py-10 text-slate-400">Veriler yükleniyor...</td>
+              <td colspan="11" class="text-center py-10 text-slate-400">Veriler yükleniyor...</td>
             </tr>
           </tbody>
         </table>
@@ -103,8 +159,91 @@
 
   </main>
 
+  <!-- YENİ MALZEME EKLEME MODALI -->
+  <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 space-y-3 border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-plus-circle text-emerald-600"></i> Tabloya Yeni Malzeme Ekle
+        </h3>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 text-lg">✖</button>
+      </div>
+
+      <form id="addForm" onsubmit="handleManualAdd(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Bölüm *</label>
+          <select id="mDept" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 font-medium">
+            <option value="Montaj">Montaj</option>
+            <option value="Kol">Kol</option>
+            <option value="Talaşlı İmalat">Talaşlı İmalat</option>
+            <option value="Yarımamul">Yarımamul</option>
+            <option value="Pompa Kumanda">Pompa Kumanda</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Malzeme Kodu *</label>
+            <input type="text" id="mCode" required placeholder="örn: 11120154" class="w-full border border-slate-300 rounded-lg p-2 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Kutu Kapasitesi / Miktar</label>
+            <input type="text" id="mQty" placeholder="örn: 750" class="w-full border border-slate-300 rounded-lg p-2 font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Malzeme Adı *</label>
+          <input type="text" id="mName" required placeholder="örn: STD PUL M24 GALVANIZLI..." class="w-full border border-slate-300 rounded-lg p-2 uppercase">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Kanban Tam Adresi</label>
+          <input type="text" id="mAddress" oninput="syncParsedFromAddress()" placeholder="örn: MONTAJ R1-K1-S1" class="w-full border border-slate-300 rounded-lg p-2 uppercase font-mono">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Raf</label>
+            <input type="text" id="mRaf" placeholder="R1" class="w-full border border-slate-300 rounded-lg p-1.5 text-center font-bold font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Kat</label>
+            <input type="text" id="mKat" placeholder="K1" class="w-full border border-slate-300 rounded-lg p-1.5 text-center font-bold font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Sıra</label>
+            <input type="text" id="mSira" placeholder="S1" class="w-full border border-slate-300 rounded-lg p-1.5 text-center font-bold font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Kutu Tipi</label>
+            <select id="mKutu" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 font-medium">
+              <option value="Plastik Kutu">Plastik Kutu</option>
+              <option value="Kutu">Kutu</option>
+              <option value="Kazan">Kazan</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Ambar Adresi</label>
+            <input type="text" id="mAmbar" placeholder="örn: J1-K1-S5" class="w-full border border-slate-300 rounded-lg p-2 font-mono uppercase">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeAddModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold">İptal</button>
+          <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    // 3 DOSYADAN ÇIKAN VERİLER (Pompa ve Yarımamul listesi olmadığı için tamamen boş: 0 parça)
+    const ADMIN_PASS = "1453";
+    let isAdminOpen = false;
+
     const SECTIONS = [
       { id: "montaj", name: "Montaj" },
       { id: "kol", name: "Kol" },
@@ -121,13 +260,122 @@
 
     let store = [];
     let currentFilter = "Tümü";
+    const STORAGE_KEY = "kanban_managed_store_v2";
 
     window.addEventListener("DOMContentLoaded", () => {
-      localStorage.clear();
+      try {
+        const local = localStorage.getItem(STORAGE_KEY);
+        if (local && JSON.parse(local).length > 0) {
+          store = JSON.parse(local);
+        }
+      } catch(e){}
+
       renderFilterPills();
       renderUI();
       syncLiveSheets(false);
     });
+
+    function handleAdminToggle() {
+      if (!isAdminOpen) {
+        const pass = prompt("Yönetici moduna geçmek için şifreyi giriniz:");
+        if (pass === ADMIN_PASS) {
+          isAdminOpen = true;
+          applyAdminState();
+        } else if (pass !== null) {
+          alert("Hatalı şifre!");
+        }
+      } else {
+        isAdminOpen = false;
+        applyAdminState();
+      }
+    }
+
+    function applyAdminState() {
+      const uploadSec = document.getElementById("adminUploadSection");
+      const addBtn = document.getElementById("addMaterialBtn");
+      const lockIcon = document.getElementById("adminLockIcon");
+      const btnText = document.getElementById("adminBtnText");
+      const thAction = document.getElementById("thAction");
+
+      if (isAdminOpen) {
+        uploadSec.classList.remove("hidden");
+        addBtn.classList.remove("hidden");
+        thAction.classList.remove("hidden");
+        lockIcon.className = "fa-solid fa-lock-open text-emerald-400";
+        btnText.innerText = "Yöneticiyi Kapat";
+      } else {
+        uploadSec.classList.add("hidden");
+        addBtn.classList.add("hidden");
+        thAction.classList.add("hidden");
+        lockIcon.className = "fa-solid fa-lock text-amber-400";
+        btnText.innerText = "Yönetici Girişi";
+      }
+      renderUI();
+    }
+
+    function openAddModal() {
+      document.getElementById("addForm").reset();
+      document.getElementById("addModal").classList.remove("hidden");
+    }
+
+    function closeAddModal() {
+      document.getElementById("addModal").classList.add("hidden");
+    }
+
+    function syncParsedFromAddress() {
+      const full = document.getElementById("mAddress").value.trim();
+      const p = parseShelfAddress(full);
+      if (p.raf !== "-") document.getElementById("mRaf").value = p.raf;
+      if (p.kat !== "-") document.getElementById("mKat").value = p.kat;
+      if (p.sira !== "-") document.getElementById("mSira").value = p.sira;
+    }
+
+    // YÖNETİCİ TABLOYA MALZEME EKLEME
+    function handleManualAdd(e) {
+      e.preventDefault();
+      const dept = document.getElementById("mDept").value;
+      const code = document.getElementById("mCode").value.trim();
+      const name = document.getElementById("mName").value.trim().toUpperCase();
+      const qty = document.getElementById("mQty").value.trim() || "-";
+      let address = document.getElementById("mAddress").value.trim().toUpperCase();
+      let raf = document.getElementById("mRaf").value.trim().toUpperCase() || "-";
+      let kat = document.getElementById("mKat").value.trim().toUpperCase() || "-";
+      let sira = document.getElementById("mSira").value.trim().toUpperCase() || "-";
+      const kutu = document.getElementById("mKutu").value;
+      const ambar = document.getElementById("mAmbar").value.trim().toUpperCase() || "-";
+
+      if (!address && (raf !== "-" || kat !== "-" || sira !== "-")) {
+        address = `${raf}-${kat}-${sira}`.replace(/--/g, "-");
+      }
+      if (!address) address = "-";
+
+      const newItem = { dept, code, name, address, raf, kat, sira, ambar, kutu, qty, isCustom: true };
+
+      const existingIdx = store.findIndex(i => i.code === code && i.dept === dept);
+      if (existingIdx >= 0) {
+        store[existingIdx] = newItem;
+      } else {
+        store.unshift(newItem);
+      }
+
+      saveAndRefresh();
+      closeAddModal();
+      alert(`✅ [${dept}] ${code} kodlu malzeme başarıyla eklendi!`);
+    }
+
+    // YÖNETİCİ TABLODAN MALZEME SİLME
+    function deleteItem(code, dept) {
+      if (confirm(`"${code}" kodlu malzemeyi bu tablodan silmek istediğinize emin misiniz?`)) {
+        store = store.filter(i => !(i.code === code && i.dept === dept));
+        saveAndRefresh();
+      }
+    }
+
+    function saveAndRefresh() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      renderFilterPills();
+      renderUI();
+    }
 
     function renderFilterPills() {
       const container = document.getElementById("filterPillsContainer");
@@ -253,8 +501,7 @@
                     sira: parsedAddr.sira,
                     ambar: ambar || "-",
                     kutu,
-                    qty: qty || "-",
-                    desc: ""
+                    qty: qty || "-"
                   });
                 }
               });
@@ -263,7 +510,10 @@
         }
 
         if (updatedStore.length > 0) {
-          store = updatedStore;
+          const customItems = store.filter(i => i.isCustom);
+          store = customItems.concat(updatedStore);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
           const nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
           document.getElementById("statusText").innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Google E-Tablolar doğrudan senkronize edildi (${store.length} parça).`;
           document.getElementById("lastSyncTime").innerText = `Son Güncelleme: ${nowStr}`;
@@ -296,8 +546,7 @@
           i.sira.toLowerCase().includes(search) ||
           i.ambar.toLowerCase().includes(search) ||
           i.kutu.toLowerCase().includes(search) ||
-          i.qty.toLowerCase().includes(search) ||
-          (i.desc && i.desc.toLowerCase().includes(search))
+          i.qty.toLowerCase().includes(search)
         );
       }
 
@@ -305,7 +554,7 @@
 
       const tbody = document.getElementById("resultBody");
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-12 text-slate-400 font-medium">Bu bölüme ait parça listesi bulunmamaktadır.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${isAdminOpen ? 11 : 10}" class="text-center py-12 text-slate-400 font-medium">Bu bölüme ait parça listesi bulunmamaktadır.</td></tr>`;
         return;
       }
 
@@ -317,7 +566,6 @@
           <td class="py-2.5 px-3 font-mono font-bold text-blue-700 text-xs whitespace-nowrap">${item.code}</td>
           <td class="py-2.5 px-3 min-w-[200px]">
             <div class="font-bold text-slate-800 text-xs">${item.name}</div>
-            ${item.desc ? `<div class="text-[10px] text-slate-500 font-medium mt-0.5"><i class="fa-solid fa-tag text-[9px] mr-1 text-slate-400"></i>${item.desc}</div>` : ''}
           </td>
           <td class="py-2.5 px-3 text-center whitespace-nowrap">
             <span class="inline-block px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-200">${item.address}</span>
@@ -334,6 +582,13 @@
               ${item.qty}
             </span>
           </td>
+          ${isAdminOpen ? `
+            <td class="py-2.5 px-3 text-center whitespace-nowrap">
+              <button onclick="deleteItem('${item.code}', '${item.dept}')" class="text-rose-500 hover:text-rose-700 p-1 transition" title="Sil">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          ` : ''}
         </tr>
       `).join("");
     }
