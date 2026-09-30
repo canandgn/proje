@@ -25,19 +25,24 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <button onclick="syncLiveSheets(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+        <button onclick="syncLiveSheets(true)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
           <i id="syncIcon" class="fa-solid fa-arrows-rotate text-blue-400"></i>
           <span class="hidden sm:inline">Listeyi Yenile</span>
         </button>
 
-        <button id="adminToggleBtn" onclick="handleAdminToggle()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+        <button id="adminToggleBtn" onclick="toggleAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
           <i id="adminLockIcon" class="fa-solid fa-lock text-amber-400"></i>
           <span id="adminBtnText" class="hidden sm:inline">Yönetici Girişi</span>
         </button>
 
-        <button id="addMaterialBtn" onclick="openAddModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition active:scale-95">
+        <button id="addMaterialBtn" onclick="openAddModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition active:scale-95 cursor-pointer">
           <i class="fa-solid fa-plus"></i>
           <span>Yeni Malzeme Ekle</span>
+        </button>
+
+        <button id="addSheetBtn" onclick="openSheetModal()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition active:scale-95 cursor-pointer">
+          <i class="fa-solid fa-file-circle-plus"></i>
+          <span>E-Tablo Bağla</span>
         </button>
 
         <span class="text-xs bg-slate-800 border border-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg font-mono">
@@ -64,41 +69,13 @@
           <h2 class="text-xs md:text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
             <i class="fa-solid fa-sliders text-blue-600"></i> YÖNETİCİ KONTROL PANELİ
           </h2>
-          <p class="text-[11px] text-slate-500 mt-0.5">Aşağıdaki butonlara tıklayarak tablonuzu Google E-Tablolar üzerinden doğrudan düzenleyebilirsiniz. Buradan eklediğiniz/sildiğiniz malzemeler tüm ustalara anında yansır[cite: 5].</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">Üstteki <b>"E-Tablo Bağla"</b> butonu ile Pompa Kumanda veya Yarımamul için yeni tablolar bağlayabilir, <b>"Yeni Malzeme Ekle"</b> ile tek tek ekleme yapabilirsiniz.</p>
         </div>
-        <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded font-bold">Yönetici Modu Aktif</span>
+        <button onclick="exitAdmin()" class="text-xs bg-rose-100 hover:bg-rose-200 text-rose-800 px-3 py-1 rounded-lg font-bold transition cursor-pointer">Yönetici Modunu Kapat</button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <a href="https://docs.google.com/spreadsheets/d/11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc/edit" target="_blank" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 flex items-center justify-between transition group shadow-sm">
-          <div>
-            <div class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-              <i class="fa-solid fa-table-cells text-blue-600 text-sm"></i> MONTAJ E-Tablosu[cite: 5]
-            </div>
-            <div class="text-[10px] text-blue-600 mt-0.5">Düzenlemek için tıkla &rarr;</div>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-blue-400 group-hover:text-blue-600"></i>
-        </a>
-
-        <a href="https://docs.google.com/spreadsheets/d/1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg/edit" target="_blank" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 flex items-center justify-between transition group shadow-sm">
-          <div>
-            <div class="text-xs font-bold text-purple-900 flex items-center gap-1.5">
-              <i class="fa-solid fa-table-cells text-purple-600 text-sm"></i> KOL E-Tablosu[cite: 5]
-            </div>
-            <div class="text-[10px] text-purple-600 mt-0.5">Düzenlemek için tıkla &rarr;</div>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-purple-400 group-hover:text-purple-600"></i>
-        </a>
-
-        <a href="https://docs.google.com/spreadsheets/d/1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME/edit" target="_blank" class="p-3 bg-amber-50 hover:bg-amber-100 rounded-lg border border-amber-200 flex items-center justify-between transition group shadow-sm">
-          <div>
-            <div class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-              <i class="fa-solid fa-table-cells text-amber-600 text-sm"></i> TALAŞLI İMALAT E-Tablosu[cite: 5]
-            </div>
-            <div class="text-[10px] text-amber-600 mt-0.5">Düzenlemek için tıkla &rarr;</div>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-xs text-amber-400 group-hover:text-amber-600"></i>
-        </a>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="sheetCardsContainer">
+        <!-- Bağlı tablolar JS ile dinamik gelecek -->
       </div>
     </section>
 
@@ -118,7 +95,7 @@
         >
       </div>
 
-      <!-- Kategori Butonları (5 Bölüm) -->
+      <!-- Kategori Butonları (5 Bölüm Hazır) -->
       <div class="flex flex-wrap gap-2 text-xs font-medium" id="filterPillsContainer"></div>
     </section>
 
@@ -159,6 +136,72 @@
 
   </main>
 
+  <!-- YÖNETİCİ ŞİFRE GİRİŞ MODALI -->
+  <div id="passwordModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4 border border-slate-100">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <i class="fa-solid fa-lock text-amber-500"></i> Yönetici Girişi
+        </h3>
+        <button onclick="closePasswordModal()" class="text-slate-400 hover:text-slate-600 text-base cursor-pointer">✖</button>
+      </div>
+
+      <form onsubmit="handlePasswordSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Yönetici Şifresini Giriniz:</label>
+          <input type="password" id="adminPassInput" autofocus placeholder="Şifre..." class="w-full border border-slate-300 rounded-lg p-2.5 text-center text-base tracking-widest font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          <p id="passError" class="text-rose-600 text-[11px] mt-1 hidden font-semibold">Hatalı şifre, lütfen tekrar deneyin.</p>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closePasswordModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer">İptal</button>
+          <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow cursor-pointer">Giriş Yap</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- YENİ E-TABLO BAĞLAMA MODALI -->
+  <div id="sheetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-3 border border-slate-100">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+          <i class="fa-solid fa-file-circle-plus text-indigo-600"></i> Yeni E-Tablo Bağla
+        </h3>
+        <button onclick="closeSheetModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✖</button>
+      </div>
+
+      <form id="sheetForm" onsubmit="handleSheetAdd(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Hangi Bölüm İçin? *</label>
+          <select id="sDept" required class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50 font-medium">
+            <option value="Pompa Kumanda">Pompa Kumanda</option>
+            <option value="Yarımamul">Yarımamul</option>
+            <option value="Talaşlı İmalat">Talaşlı İmalat</option>
+            <option value="Montaj">Montaj</option>
+            <option value="Kol">Kol</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Google E-Tablo Linki veya ID'si *</label>
+          <input type="text" id="sUrl" required placeholder="https://docs.google.com/spreadsheets/d/.../edit" class="w-full border border-slate-300 rounded-lg p-2 font-mono text-[11px]">
+          <p class="text-[10px] text-slate-400 mt-0.5">Google E-Tablo'nun normal paylaşım linkini doğrudan buraya yapıştırabilirsiniz.</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Sayfa/Sekme Adı (Opsiyonel)</label>
+          <input type="text" id="sSheetName" placeholder="örn: Sayfa1 veya boş bırakın" class="w-full border border-slate-300 rounded-lg p-2">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" onclick="closeSheetModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold cursor-pointer">İptal</button>
+          <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow cursor-pointer">Tabloyu Bağla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- YENİ MALZEME EKLEME MODALI -->
   <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 space-y-3 border border-slate-100 max-h-[90vh] overflow-y-auto">
@@ -166,7 +209,7 @@
         <h3 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
           <i class="fa-solid fa-plus-circle text-emerald-600"></i> Tabloya Yeni Malzeme Ekle
         </h3>
-        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 text-lg">✖</button>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✖</button>
       </div>
 
       <form id="addForm" onsubmit="handleManualAdd(event)" class="space-y-3 text-xs">
@@ -233,8 +276,8 @@
         </div>
 
         <div class="flex justify-end gap-2 pt-2 border-t">
-          <button type="button" onclick="closeAddModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold">İptal</button>
-          <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow">Kaydet</button>
+          <button type="button" onclick="closeAddModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold cursor-pointer">İptal</button>
+          <button type="submit" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow cursor-pointer">Kaydet</button>
         </div>
       </form>
     </div>
@@ -244,27 +287,35 @@
     const ADMIN_PASS = "1453";
     let isAdminOpen = false;
 
+    // 5 BÖLÜMÜN HEPSİ SABİT VE HAZIR
     const SECTIONS = [
       { id: "montaj", name: "Montaj" },
       { id: "kol", name: "Kol" },
       { id: "talasli", name: "Talaşlı İmalat" },
-      { id: "yarimamul", name: "Yarımamul" },
-      { id: "pompa", name: "Pompa Kumanda" }
+      { id: "pompa", name: "Pompa Kumanda" },
+      { id: "yarimamul", name: "Yarımamul" }
     ];
 
-    const SHEETS_CONFIG = [
+    // VARSAYILAN VE EKSTRA EKLENEN E-TABLOLAR
+    const DEFAULT_CONFIGS = [
       { id: "11NAiDDg3HoUUzztYeZ5B4XcQA4kIkw3ynzCifoMp_Yc", sheet: "Toplu Liste", dept: "Montaj" },
       { id: "1NIDTg038eeXpaWAOPvTLPkPilUia1uiP6delLNVS1zg", sheet: "Toplu Liste", dept: "Kol" },
       { id: "1N87Wa0fKetxCL7QB4-l6NgFY4kUcGWXvNCF1QCEA4ME", sheet: "Güncel Liste", dept: "Talaşlı İmalat" }
     ];
 
+    let sheetsList = [];
     let store = [];
     let currentFilter = "Tümü";
-    const STORAGE_KEY = "kanban_managed_store_v2";
+
+    const STORAGE_ITEMS_KEY = "kanban_inventory_store_v4";
+    const STORAGE_SHEETS_KEY = "kanban_custom_sheets_v4";
 
     window.addEventListener("DOMContentLoaded", () => {
+      loadSheetsConfig();
+      renderSheetCards();
+
       try {
-        const local = localStorage.getItem(STORAGE_KEY);
+        const local = localStorage.getItem(STORAGE_ITEMS_KEY);
         if (local && JSON.parse(local).length > 0) {
           store = JSON.parse(local);
         }
@@ -275,24 +326,137 @@
       syncLiveSheets(false);
     });
 
-    function handleAdminToggle() {
-      if (!isAdminOpen) {
-        const pass = prompt("Yönetici moduna geçmek için şifreyi giriniz:");
-        if (pass === ADMIN_PASS) {
-          isAdminOpen = true;
-          applyAdminState();
-        } else if (pass !== null) {
-          alert("Hatalı şifre!");
+    function loadSheetsConfig() {
+      try {
+        const custom = localStorage.getItem(STORAGE_SHEETS_KEY);
+        if (custom) {
+          sheetsList = JSON.parse(custom);
+        } else {
+          sheetsList = [...DEFAULT_CONFIGS];
         }
-      } else {
-        isAdminOpen = false;
-        applyAdminState();
+      } catch(e) {
+        sheetsList = [...DEFAULT_CONFIGS];
       }
+    }
+
+    function saveSheetsConfig() {
+      localStorage.setItem(STORAGE_SHEETS_KEY, JSON.stringify(sheetsList));
+      renderSheetCards();
+    }
+
+    function renderSheetCards() {
+      const container = document.getElementById("sheetCardsContainer");
+      if (!container) return;
+
+      container.innerHTML = sheetsList.map((cfg, idx) => {
+        let badgeColor = "bg-blue-50 border-blue-200 text-blue-900";
+        if (cfg.dept === "Kol") badgeColor = "bg-purple-50 border-purple-200 text-purple-900";
+        if (cfg.dept === "Talaşlı İmalat") badgeColor = "bg-amber-50 border-amber-200 text-amber-900";
+        if (cfg.dept === "Pompa Kumanda") badgeColor = "bg-cyan-50 border-cyan-200 text-cyan-900";
+        if (cfg.dept === "Yarımamul") badgeColor = "bg-emerald-50 border-emerald-200 text-emerald-900";
+
+        return `
+          <div class="p-3 ${badgeColor} rounded-lg border flex items-center justify-between shadow-sm">
+            <div>
+              <div class="text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-table-cells text-sm"></i> [${cfg.dept}] E-Tablosu
+              </div>
+              <a href="https://docs.google.com/spreadsheets/d/${cfg.id}/edit" target="_blank" class="text-[10px] text-blue-600 hover:underline mt-0.5 inline-block font-semibold">
+                Tabloyu Aç / Düzenle &rarr;
+              </a>
+            </div>
+            ${idx >= DEFAULT_CONFIGS.length ? `
+              <button onclick="removeCustomSheet(${idx})" class="text-rose-500 hover:text-rose-700 text-xs p-1" title="Tablo Bağlantısını Kaldır">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join("");
+    }
+
+    // YENİ E-TABLO BAĞLAMA MODALINI YÖNETME
+    function openSheetModal() {
+      document.getElementById("sheetForm").reset();
+      document.getElementById("sheetModal").classList.remove("hidden");
+    }
+
+    function closeSheetModal() {
+      document.getElementById("sheetModal").classList.add("hidden");
+    }
+
+    function handleSheetAdd(e) {
+      e.preventDefault();
+      const dept = document.getElementById("sDept").value;
+      const urlOrId = document.getElementById("sUrl").value.trim();
+      const sheetName = document.getElementById("sSheetName").value.trim();
+
+      let sheetId = urlOrId;
+      const m = urlOrId.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (m) sheetId = m[1];
+
+      if (!sheetId) {
+        alert("Geçerli bir Google E-Tablo linki giriniz.");
+        return;
+      }
+
+      sheetsList.push({
+        id: sheetId,
+        sheet: sheetName || "Sayfa1",
+        dept: dept
+      });
+
+      saveSheetsConfig();
+      closeSheetModal();
+      alert(`✅ [${dept}] için yeni E-Tablo başarıyla bağlandı! Veriler çekiliyor...`);
+      syncLiveSheets(true);
+    }
+
+    function removeCustomSheet(idx) {
+      if (confirm("Bu tablonun canlı bağlantısını kaldırmak istediğinize emin misiniz?")) {
+        sheetsList.splice(idx, 1);
+        saveSheetsConfig();
+        syncLiveSheets(true);
+      }
+    }
+
+    // MODAL İLE ŞİFRE AÇMA
+    function toggleAdminModal() {
+      if (isAdminOpen) {
+        exitAdmin();
+      } else {
+        document.getElementById("passError").classList.add("hidden");
+        document.getElementById("adminPassInput").value = "";
+        document.getElementById("passwordModal").classList.remove("hidden");
+        setTimeout(() => document.getElementById("adminPassInput").focus(), 100);
+      }
+    }
+
+    function closePasswordModal() {
+      document.getElementById("passwordModal").classList.add("hidden");
+    }
+
+    function handlePasswordSubmit(e) {
+      e.preventDefault();
+      const val = document.getElementById("adminPassInput").value.trim();
+      if (val === ADMIN_PASS) {
+        isAdminOpen = true;
+        closePasswordModal();
+        applyAdminState();
+      } else {
+        document.getElementById("passError").classList.remove("hidden");
+      }
+    }
+
+    function exitAdmin() {
+      isAdminOpen = false;
+      applyAdminState();
     }
 
     function applyAdminState() {
       const uploadSec = document.getElementById("adminUploadSection");
       const addBtn = document.getElementById("addMaterialBtn");
+      const addSheetBtn = document.getElementById("addSheetBtn");
       const lockIcon = document.getElementById("adminLockIcon");
       const btnText = document.getElementById("adminBtnText");
       const thAction = document.getElementById("thAction");
@@ -300,12 +464,14 @@
       if (isAdminOpen) {
         uploadSec.classList.remove("hidden");
         addBtn.classList.remove("hidden");
+        addSheetBtn.classList.remove("hidden");
         thAction.classList.remove("hidden");
         lockIcon.className = "fa-solid fa-lock-open text-emerald-400";
-        btnText.innerText = "Yöneticiyi Kapat";
+        btnText.innerText = "Yönetici Çıkışı";
       } else {
         uploadSec.classList.add("hidden");
         addBtn.classList.add("hidden");
+        addSheetBtn.classList.add("hidden");
         thAction.classList.add("hidden");
         lockIcon.className = "fa-solid fa-lock text-amber-400";
         btnText.innerText = "Yönetici Girişi";
@@ -330,7 +496,6 @@
       if (p.sira !== "-") document.getElementById("mSira").value = p.sira;
     }
 
-    // YÖNETİCİ TABLOYA MALZEME EKLEME
     function handleManualAdd(e) {
       e.preventDefault();
       const dept = document.getElementById("mDept").value;
@@ -363,7 +528,6 @@
       alert(`✅ [${dept}] ${code} kodlu malzeme başarıyla eklendi!`);
     }
 
-    // YÖNETİCİ TABLODAN MALZEME SİLME
     function deleteItem(code, dept) {
       if (confirm(`"${code}" kodlu malzemeyi bu tablodan silmek istediğinize emin misiniz?`)) {
         store = store.filter(i => !(i.code === code && i.dept === dept));
@@ -372,7 +536,7 @@
     }
 
     function saveAndRefresh() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(store));
       renderFilterPills();
       renderUI();
     }
@@ -443,8 +607,9 @@
       let updatedStore = [];
 
       try {
-        for (const cfg of SHEETS_CONFIG) {
-          const url = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheet)}&t=${new Date().getTime()}`;
+        for (const cfg of sheetsList) {
+          const sheetParam = cfg.sheet ? `&sheet=${encodeURIComponent(cfg.sheet)}` : '';
+          const url = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json${sheetParam}&t=${new Date().getTime()}`;
           
           try {
             const resp = await fetch(url);
@@ -482,7 +647,7 @@
                 let ambar = rowObj["ambar adres"] || rowObj["ambar adresi"] || rowObj["ambar"] || getVal(5) || "-";
                 
                 let kutu = "Kutu";
-                if (cfg.dept === "Talaşlı İmalat") {
+                if (cfg.dept === "Talaşlı İmalat" || cfg.dept === "Pompa Kumanda" || cfg.dept === "Yarımamul") {
                   kutu = "Plastik Kutu";
                 } else {
                   let rawKutu = rowObj["kutu tipi"] || rowObj["kutu"] || getVal(6);
@@ -512,7 +677,7 @@
         if (updatedStore.length > 0) {
           const customItems = store.filter(i => i.isCustom);
           store = customItems.concat(updatedStore);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+          localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(store));
 
           const nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
           document.getElementById("statusText").innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> Google E-Tablolar doğrudan senkronize edildi (${store.length} parça).`;
@@ -584,7 +749,7 @@
           </td>
           ${isAdminOpen ? `
             <td class="py-2.5 px-3 text-center whitespace-nowrap">
-              <button onclick="deleteItem('${item.code}', '${item.dept}')" class="text-rose-500 hover:text-rose-700 p-1 transition" title="Sil">
+              <button onclick="deleteItem('${item.code}', '${item.dept}')" class="text-rose-500 hover:text-rose-700 p-1 transition cursor-pointer" title="Sil">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </td>
